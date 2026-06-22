@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -333,8 +333,8 @@ So Po He.`
         scene.fog = new THREE.FogExp2(0x05070a, 0.05);
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        // Default view angle set to (0, -0.5, 1.0)
-        camera.position.set(0, -0.5, 1.0);
+        // Default view angle updated to (0, 2.5, 2.5)
+        camera.position.set(0, 2.5, 2.5);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
