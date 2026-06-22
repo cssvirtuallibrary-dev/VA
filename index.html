@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -273,7 +273,7 @@
 
             <div class="control-group">
                 <label>Auto-Rotation Speed (RPM)</label>
-                <input type="range" id="rotation-speed" min="0" max="5" step="0.1" value="1">
+                <input type="range" id="rotation-speed" min="0" max="5" step="0.1" value="0.5">
             </div>
 
             <div class="control-group">
@@ -312,10 +312,11 @@
 
     <script>
         // --- 1. Coordinate, Asset & Mantra Data Mapping ---
+        // Shifted to (0, 0.1, 0) -> mapped to excelPos [X, Z, Y] -> [0.0, 0.0, 0.1]
         const sphereData = [
             { 
                 name: "Siddham VA Core", 
-                excelPos: [0.1, 0.0, 0.0], 
+                excelPos: [0.0, 0.0, 0.1], 
                 chakra: "Heart Chakra / All-Encompassing", 
                 image: "VA_Gold.png", 
                 char: "𑖪", 
@@ -332,7 +333,8 @@ So Po He.`
         scene.fog = new THREE.FogExp2(0x05070a, 0.05);
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.set(3.5, 2.5, 5.5);
+        // Default view angle set to (0, -0.5, 1.0)
+        camera.position.set(0, -0.5, 1.0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -347,7 +349,8 @@ So Po He.`
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
         controls.maxDistance = 12;
-        controls.minDistance = 2;
+        controls.minDistance = 0.5; 
+        controls.target.set(0, 0.1, 0); // Focus directly on the shifted VA sphere position
 
         // --- 3. Procedural Studio Environment Map ---
         function createStudioEnvMap() {
@@ -420,6 +423,13 @@ So Po He.`
             transparent: true,
             opacity: 1.0,
             side: THREE.DoubleSide,
+            depthWrite: false
+        });
+
+        // Completely transparent material for the clickable sphere bounds
+        const invisibleHitboxMaterial = new THREE.MeshBasicMaterial({
+            transparent: true,
+            opacity: 0.0,
             depthWrite: false
         });
 
@@ -503,7 +513,8 @@ So Po He.`
         const clickableSpheres = []; 
         const textureLoader = new THREE.TextureLoader();
 
-        function createFallbackGlyphTexture(char, phonetic) {
+        // Generates fallback texture containing ONLY the centered, maximized character image (No text string "VA")
+        function createFallbackGlyphTexture(char) {
             const canvas = document.createElement('canvas');
             canvas.width = 512;
             canvas.height = 512;
@@ -514,15 +525,10 @@ So Po He.`
             ctx.textBaseline = 'middle';
             
             ctx.shadowColor = '#ffd700';
-            ctx.shadowBlur = 25;
+            ctx.shadowBlur = 30;
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 240px sans-serif';
-            ctx.fillText(char, 256, 220);
-
-            ctx.shadowBlur = 8;
-            ctx.fillStyle = '#ffb90f';
-            ctx.font = '600 48px sans-serif';
-            ctx.fillText(phonetic.toUpperCase(), 256, 400);
+            ctx.font = 'bold 340px sans-serif'; // Maximized font size
+            ctx.fillText(char, 256, 256); // Centered vertically
 
             const tex = new THREE.CanvasTexture(canvas);
             tex.colorSpace = THREE.SRGBColorSpace;
@@ -537,7 +543,8 @@ So Po He.`
 
             const sphereGeo = new THREE.SphereGeometry(0.19, 32, 32); 
             
-            const sphere = new THREE.Mesh(sphereGeo, clearBubbleGlass.clone());
+            // Use completely transparent hit-box mesh so only the character image displays
+            const sphere = new THREE.Mesh(sphereGeo, invisibleHitboxMaterial);
             sphere.position.copy(pos);
             sphere.userData = { 
                 ...data,
@@ -546,9 +553,10 @@ So Po He.`
             spheresGroup.add(sphere);
             clickableSpheres.push(sphere);
 
-            const planeSize = 0.35; 
+            // Maximized plane size to exactly fill the sphere boundary (0.19 radius * 2 = 0.38 plane size)
+            const planeSize = 0.38; 
             const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
-            let characterTex = createFallbackGlyphTexture(data.char, data.phonetic);
+            let characterTex = createFallbackGlyphTexture(data.char);
 
             const charMaterial = new THREE.MeshBasicMaterial({
                 map: characterTex,
@@ -584,7 +592,7 @@ So Po He.`
 
         // --- 8b. Dense Golden Spherical Ripple Wave Effect ---
         const ripples = [];
-        const numRipples = 10; // Increased to 10 for a dense, almost continuous wave pattern
+        const numRipples = 10; 
         const minRippleRadius = 0.19; // Starts at VA sphere surface
         const maxRippleRadius = 4.5;  // Spreads far beyond outer bubble (radius 2.1)
         const rippleSpeed = 1.2;      // Expansion speed
@@ -609,7 +617,6 @@ So Po He.`
                     uniform float opacity;
                     varying vec3 vNormal;
                     void main() {
-                        // Edge Fresnel glow detection
                         float intensity = pow(1.0 - abs(vNormal.z), 2.5);
                         gl_FragColor = vec4(glowColor * intensity * 1.5, intensity * opacity);
                     }
@@ -621,12 +628,12 @@ So Po He.`
             });
 
             const rippleMesh = new THREE.Mesh(rippleGeo, rippleMat);
-            rippleMesh.position.set(0.1, 0.0, 0.0); // Anchor at VA sphere location
+            // Anchor at shifted VA sphere location (0.0, 0.1, 0.0)
+            rippleMesh.position.set(0.0, 0.1, 0.0); 
             scene.add(rippleMesh);
 
             ripples.push({
                 mesh: rippleMesh,
-                // Evenly stagger the starting radii of all 10 ripples
                 radius: minRippleRadius + (i * (maxRippleRadius - minRippleRadius) / numRipples),
                 material: rippleMat
             });
@@ -756,22 +763,26 @@ So Po He.`
             const glowVal = parseFloat(glowIntensityInput.value);
             coreLight.intensity = (Math.sin(elapsedTime * 2) * 0.3 + 1.0) * glowVal;
 
-            // --- 13a. Animate Single VA Sphere Breathing Glow ---
+            // --- 13a. Animate Single VA Sphere Character Glow ---
             const mainSphere = clickableSpheres[0];
             if (mainSphere) {
                 const breathing = Math.sin(elapsedTime * 2.0) * 0.5 + 0.5; 
                 mainSphere.userData.glow = THREE.MathUtils.lerp(mainSphere.userData.glow, breathing, 0.1);
                 
+                // Keep hit-box scaled with breathing
                 mainSphere.scale.setScalar(1.0 + (mainSphere.userData.glow * 0.2));
+                
+                // Dynamically breathe and glow the character plane itself
                 const mainPlane = characterPlanes[0].mesh;
                 if (mainPlane) {
                     mainPlane.scale.setScalar(1.0 + (mainSphere.userData.glow * 0.15));
+                    // Modulate color brightness based on breathing cycle
+                    mainPlane.material.color.setRGB(
+                        1.0, 
+                        0.84 + mainSphere.userData.glow * 0.16, 
+                        0.0 + mainSphere.userData.glow * 0.3
+                    );
                 }
-
-                mainSphere.material.color.lerpColors(new THREE.Color(0xffffff), new THREE.Color(0xffd700), mainSphere.userData.glow);
-                mainSphere.material.emissive.lerpColors(new THREE.Color(0x000000), new THREE.Color(0xffaa00), mainSphere.userData.glow);
-                mainSphere.material.emissiveIntensity = mainSphere.userData.glow * 1.5;
-                mainSphere.material.roughness = 0.05 + (mainSphere.userData.glow * 0.25);
             }
 
             // --- 13b. Animate Golden Ripple Waves ---
@@ -789,14 +800,11 @@ So Po He.`
                 let opacity = 0.0;
                 
                 if (lifeRatio < 0.1) {
-                    // Fast fade-in as it leaves the VA sphere
                     opacity = lifeRatio / 0.1;
                 } else {
-                    // Clean fade-out past the outer shell
                     opacity = 1.0 - (lifeRatio - 0.1) / 0.9;
                 }
 
-                // Reduced maximum opacity per wave slightly (0.45) so the overlapping waves blend beautifully
                 ripple.material.uniforms.opacity.value = opacity * 0.45;
             });
 
@@ -822,3 +830,4 @@ So Po He.`
     </script>
 </body>
 </html>
+
