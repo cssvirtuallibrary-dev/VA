@@ -333,8 +333,8 @@ So Po He.`
         scene.fog = new THREE.FogExp2(0x05070a, 0.05);
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        // Default view angle updated to direct upper center front view: (0, 0.8, 2.0)
-        camera.position.set(0, 0.8, 2.0);
+        // Default view angle rotated 190 degrees around Y-axis: (0, 0.8, 2.0) -> (-0.347, 0.8, -1.97)
+        camera.position.set(-0.347, 0.8, -1.97);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
