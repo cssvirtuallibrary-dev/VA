@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lotus Bodhicitta System</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #05070a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #fff;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+        
+        /* Collapsible UI Menu Control Panel */
+        #ui-container {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(10, 15, 25, 0.8);
+            padding: 12px 16px;
+            border-radius: 14px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            width: 280px;
+            pointer-events: auto;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 10;
+        }
+        #ui-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        h1 {
+            font-size: 15px;
+            margin: 0;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        #ui-toggle-btn {
+            background: none;
+            border: none;
+            color: #ffd700;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px;
+            transition: transform 0.3s ease;
+        }
+        #ui-content {
+            margin-top: 12px;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            max-height: 400px;
+            opacity: 1;
+        }
+        /* Collapsed State Styles */
+        #ui-container.collapsed {
+            width: 220px;
+        }
+        #ui-container.collapsed #ui-toggle-btn {
+            transform: rotate(-90deg);
+        }
+        #ui-container.collapsed #ui-content {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        /* Control Group Styling */
+        p {
+            font-size: 11px;
+            color: #aaa;
+            margin: 0 0 12px 0;
+            line-height: 1.4;
+        }
+        .control-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        select, input[type="range"] {
+            width: 100%;
+            background: #141a24;
+            border: 1px solid #253043;
+            color: #fff;
+            padding: 6px;
+            border-radius: 6px;
+            outline: none;
+            box-sizing: border-box;
+            font-size: 11px;
+        }
+
+        /* Interactive Click Popup Card */
+        #popup-card {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%) translateY(150px);
+            background: rgba(10, 15, 25, 0.92);
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            border-radius: 16px;
+            padding: 16px 20px;
+            width: 85%;
+            max-width: 340px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 20;
+        }
+        #popup-card.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #popup-close {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        #popup-title {
+            color: #ffd700;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 6px;
+        }
+        .popup-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+        .popup-label {
+            color: #77849a;
+        }
+        .popup-val {
+            font-weight: 500;
+            color: #fff;
+        }
+
+        /* Sacred Mantra Styling Block */
+        .popup-mantra-section {
+            margin-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 10px;
+        }
+        .popup-mantra-val {
+            font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+            font-style: italic;
+            font-size: 12.5px;
+            line-height: 1.55;
+            color: #ffd700;
+            background: rgba(255, 215, 0, 0.04);
+            border-left: 2px solid #ffd700;
+            padding: 10px 14px;
+            border-radius: 0 8px 8px 0;
+            letter-spacing: 0.3px;
+            white-space: pre-line;
+        }
+
+        /* Loading Screen Overlay */
+        #loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #05070a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.6s ease;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 215, 0, 0.1);
+            border-top-color: #ffd700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #loading-text {
+            margin-top: 16px;
+            color: #ffd700;
+            font-size: 12px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        /* Mobile Layout Adaptations */
+        @media (max-width: 600px) {
+            #ui-container {
+                width: calc(100% - 30px);
+                max-width: none;
+                top: 10px;
+                left: 10px;
+            }
+            #ui-container.collapsed {
+                width: calc(100% - 30px);
+            }
+        }
+    </style>
+    <!-- Three.js components -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div id="loading-text">Calibrating Lotus Bodhicitta System...</div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <!-- Collapsible UI Control Panel (Defaults to Collapsed) -->
+    <div id="ui-container" class="collapsed">
+        <div id="ui-header">
+            <h1>Lotus Bodhicitta</h1>
+            <button id="ui-toggle-btn">▼</button>
+        </div>
+        <div id="ui-content">
+            <p>Interactive meditation matrix displaying the Buddha's core, the single Siddham VA sphere, and dense golden ripples.</p>
+            
+            <div class="control-group">
+                <label>Character Render Mode</label>
+                <select id="billboard-mode">
+                    <option value="rotate" selected>Rotate in 3D Space</option>
+                    <option value="billboard">Face Camera (Billboard)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Auto-Rotation Speed (RPM)</label>
+                <input type="range" id="rotation-speed" min="0" max="5" step="0.1" value="0.5">
+            </div>
+
+            <div class="control-group">
+                <label>Core Glow Intensity</label>
+                <input type="range" id="glow-intensity" min="0" max="3" step="0.1" value="1.5">
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup Info Card for Click Interactivity -->
+    <div id="popup-card">
+        <button id="popup-close">&times;</button>
+        <div id="popup-title">Sphere Details</div>
+        <div class="popup-row">
+            <span class="popup-label">Location:</span>
+            <span class="popup-val" id="popup-name">-</span>
+        </div>
+        <div class="popup-row">
+            <span class="popup-label">Chakra Center:</span>
+            <span class="popup-val" id="popup-chakra">-</span>
+        </div>
+        <div class="popup-row">
+            <span class="popup-label">Siddham Glyph:</span>
+            <span class="popup-val" id="popup-glyph">-</span>
+        </div>
+        <div class="popup-row">
+            <span class="popup-label">Coordinates:</span>
+            <span class="popup-val" id="popup-coords">-</span>
+        </div>
+        <!-- Mantra Section -->
+        <div class="popup-mantra-section">
+            <div class="popup-label" style="margin-bottom: 6px; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">Sacred Mantra:</div>
+            <div class="popup-mantra-val" id="popup-mantra">-</div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Coordinate, Asset & Mantra Data Mapping ---
+        // Moved 0.1 in +X direction from (0.1, 0.0, 0.0) -> (0.2, 0.0, 0.0)
+        const sphereData = [
+            { 
+                name: "Siddham VA Core", 
+                excelPos: [0.2, 0.0, 0.0], 
+                chakra: "Heart Chakra / All-Encompassing", 
+                image: "VA_Gold.png", 
+                char: "𑖪", 
+                phonetic: "Va",
+                mantra: `Om Wa Dz La 
+Bo La Wa Li Ning 
+So Po He.`
+            }
+        ];
+
+        // --- 2. Setup Scene, Camera, and Renderer ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x05070a, 0.05);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        // Default view angle set to (0, 0.5, 2.0)
+        camera.position.set(0, 0.5, 2.0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxDistance = 12;
+        controls.minDistance = 0.5; // Adjusted to allow clean navigation inside/near the bubble
+
+        // --- 3. Procedural Studio Environment Map ---
+        function createStudioEnvMap() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#101622');
+            grad.addColorStop(0.5, '#05070a');
+            grad.addColorStop(1, '#020305');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(40, 20, 30, 40);
+            ctx.fillRect(180, 40, 40, 30);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+            return texture;
+        }
+        scene.environment = createStudioEnvMap();
+
+        // --- 4. Studio Lighting ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+        scene.add(ambientLight);
+
+        const keyLight = new THREE.DirectionalLight(0xfff5e6, 2.0);
+        keyLight.position.set(5, 8, 5);
+        keyLight.castShadow = true;
+        scene.add(keyLight);
+
+        const fillLight = new THREE.DirectionalLight(0xdbe9ff, 1.0);
+        fillLight.position.set(-5, 3, -5);
+        scene.add(fillLight);
+
+        const rimLight = new THREE.DirectionalLight(0xffffff, 1.5);
+        rimLight.position.set(0, -5, 0);
+        scene.add(rimLight);
+
+        const coreLight = new THREE.PointLight(0x00aaff, 2.0, 5); 
+        coreLight.position.set(0, 0, 0);
+        scene.add(coreLight);
+
+        // --- 5. Materials Setup ---
+        const privacyBlueGlass = new THREE.MeshPhysicalMaterial({
+            color: 0x88ddff,             
+            emissive: 0x0044aa,          
+            emissiveIntensity: 0.4,      
+            roughness: 0.5,              
+            metalness: 0.1,
+            transmission: 0.75,          
+            ior: 1.5,                    
+            thickness: 1.8,              
+            transparent: true,
+            opacity: 1.0,
+            side: THREE.DoubleSide,
+            depthWrite: false
+        });
+
+        const clearBubbleGlass = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            roughness: 0.05,
+            metalness: 0.1,
+            transmission: 0.98,
+            ior: 1.52,
+            thickness: 0.3,
+            transparent: true,
+            opacity: 1.0,
+            side: THREE.DoubleSide,
+            depthWrite: false
+        });
+
+        // Completely transparent material for the clickable sphere bounds
+        const invisibleHitboxMaterial = new THREE.MeshBasicMaterial({
+            transparent: true,
+            opacity: 0.0,
+            depthWrite: false
+        });
+
+        // --- 6. Creating the Outer Bubble ---
+        const outerBubbleGeo = new THREE.SphereGeometry(2.1, 64, 64);
+        const outerBubble = new THREE.Mesh(outerBubbleGeo, clearBubbleGlass);
+        scene.add(outerBubble);
+
+        // --- 7. Loading the 3D Buddha Model ---
+        const buddhaGroup = new THREE.Group();
+        scene.add(buddGroup);
+
+        const loader = new THREE.GLTFLoader();
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
+
+        const MODEL_URL = 'glass+buddha+statue+3d+model.glb'; 
+
+        loader.load(MODEL_URL, 
+            function(gltf) {
+                const buddhaMesh = gltf.scene;
+                
+                buddhaMesh.traverse((node) => {
+                    if (node.isMesh) {
+                        node.material = privacyBlueGlass; 
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+                
+                buddhaMesh.scale.set(1.4, 1.4, 1.4); 
+                buddhaMesh.position.set(0.0, -0.5, -0.18); 
+                buddhaMesh.rotation.y = Math.PI / 2; 
+                
+                buddhaGroup.add(buddhaMesh);
+                
+                loadingOverlay.style.opacity = 0;
+                setTimeout(() => { loadingOverlay.style.display = 'none'; }, 600);
+            },
+            function (xhr) {
+                if (xhr.total > 0) {
+                    const percent = Math.round((xhr.loaded / xhr.total) * 100);
+                    loadingText.innerText = `Calibrating Bodhicitta Matrix (${percent}%)`;
+                }
+            },
+            function(err) {
+                console.warn("Could not find local GLB model. Generating procedural frosted glass fallback.", err);
+                loadingText.innerText = "Initializing Fallback System...";
+                
+                const fallbackGroup = new THREE.Group();
+                const head = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), privacyBlueGlass);
+                head.position.y = 0.55;
+                fallbackGroup.add(head);
+
+                const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.28, 0.65, 32), privacyBlueGlass);
+                torso.position.y = 0.1;
+                fallbackGroup.add(torso);
+
+                const legs = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.12, 16, 100), privacyBlueGlass);
+                legs.rotation.x = Math.PI / 2;
+                legs.position.y = -0.25;
+                fallbackGroup.add(legs);
+
+                fallbackGroup.position.set(0.0, -0.5, -0.18);
+                fallbackGroup.rotation.y = Math.PI / 2; 
+                
+                buddhaGroup.add(fallbackGroup);
+
+                setTimeout(() => {
+                    loadingOverlay.style.opacity = 0;
+                    setTimeout(() => { loadingOverlay.style.display = 'none'; }, 600);
+                }, 1000);
+            }
+        );
+
+        // --- 8. Creating the Single VA Sphere and Siddham Character ---
+        const spheresGroup = new THREE.Group();
+        scene.add(spheresGroup);
+
+        const characterPlanes = []; 
+        const clickableSpheres = []; 
+        const textureLoader = new THREE.TextureLoader();
+
+        function createFallbackGlyphTexture(char, phonetic) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            ctx.clearRect(0, 0, 512, 512);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            ctx.shadowColor = '#ffd700';
+            ctx.shadowBlur = 25;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 240px sans-serif';
+            ctx.fillText(char, 256, 220);
+
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = '#ffb90f';
+            ctx.font = '600 48px sans-serif';
+            ctx.fillText(phonetic.toUpperCase(), 256, 400);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.colorSpace = THREE.SRGBColorSpace;
+            return tex;
+        }
+
+        sphereData.forEach((data) => {
+            const x = data.excelPos[0];
+            const y = data.excelPos[2]; 
+            const z = data.excelPos[1]; 
+            const pos = new THREE.Vector3(x, y, z);
+
+            const sphereGeo = new THREE.SphereGeometry(0.19, 32, 32); 
+            
+            // Use completely transparent hit-box mesh so only the character image displays
+            const sphere = new THREE.Mesh(sphereGeo, invisibleHitboxMaterial);
+            sphere.position.copy(pos);
+            sphere.userData = { 
+                ...data,
+                glow: 0.0 
+            }; 
+            spheresGroup.add(sphere);
+            clickableSpheres.push(sphere);
+
+            // Maximized plane size to exactly fill the sphere boundary (0.19 radius * 2 = 0.38 plane size)
+            const planeSize = 0.38; 
+            const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
+            let characterTex = createFallbackGlyphTexture(data.char, data.phonetic);
+
+            const charMaterial = new THREE.MeshBasicMaterial({
+                map: characterTex,
+                transparent: true,
+                side: THREE.DoubleSide,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending
+            });
+
+            const plane = new THREE.Mesh(planeGeo, charMaterial);
+            plane.position.copy(pos);
+            spheresGroup.add(plane);
+
+            textureLoader.load(
+                data.image,
+                (loadedTex) => {
+                    loadedTex.colorSpace = THREE.SRGBColorSpace;
+                    charMaterial.map = loadedTex;
+                    charMaterial.needsUpdate = true;
+                },
+                undefined,
+                () => {
+                    console.log(`Using procedural high-fidelity gold texture fallback for ${data.phonetic}`);
+                }
+            );
+
+            characterPlanes.push({
+                mesh: plane,
+                initialPos: pos.clone(),
+                offset: Math.random() * Math.PI * 2
+            });
+        });
+
+        // --- 8b. Dense Golden Spherical Ripple Wave Effect ---
+        const ripples = [];
+        const numRipples = 10; 
+        const minRippleRadius = 0.19; // Starts at VA sphere surface
+        const maxRippleRadius = 4.5;  // Spreads far beyond outer bubble (radius 2.1)
+        const rippleSpeed = 1.2;      // Expansion speed
+
+        for (let i = 0; i < numRipples; i++) {
+            const rippleGeo = new THREE.SphereGeometry(1, 32, 32);
+            
+            const rippleMat = new THREE.ShaderMaterial({
+                uniforms: {
+                    glowColor: { value: new THREE.Color(0xffd700) },
+                    opacity: { value: 0.0 }
+                },
+                vertexShader: `
+                    varying vec3 vNormal;
+                    void main() {
+                        vNormal = normalize(normalMatrix * normal);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 glowColor;
+                    uniform float opacity;
+                    varying vec3 vNormal;
+                    void main() {
+                        float intensity = pow(1.0 - abs(vNormal.z), 2.5);
+                        gl_FragColor = vec4(glowColor * intensity * 1.5, intensity * opacity);
+                    }
+                `,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+
+            const rippleMesh = new THREE.Mesh(rippleGeo, rippleMat);
+            // Anchor at new VA sphere location (0.2, 0.0, 0.0)
+            rippleMesh.position.set(0.2, 0.0, 0.0); 
+            scene.add(rippleMesh);
+
+            ripples.push({
+                mesh: rippleMesh,
+                radius: minRippleRadius + (i * (maxRippleRadius - minRippleRadius) / numRipples),
+                material: rippleMat
+            });
+        }
+
+        // --- 9. Base Aesthetic Grid ---
+        const gridHelper = new THREE.GridHelper(8, 32, 0x00aaff, 0x141a24); 
+        gridHelper.position.y = -2.3;
+        scene.add(gridHelper);
+
+        // --- 10. Collapsible Menu Controls ---
+        const uiContainer = document.getElementById('ui-container');
+        const uiHeader = document.getElementById('ui-header');
+        const uiToggleBtn = document.getElementById('ui-toggle-btn');
+
+        uiHeader.addEventListener('click', () => {
+            const isCollapsed = uiContainer.classList.toggle('collapsed');
+            uiToggleBtn.innerText = isCollapsed ? '▼' : '▲';
+        });
+
+        // --- 11. Click Interactivity (Raycasting) ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        const popupCard = document.getElementById('popup-card');
+        const popupName = document.getElementById('popup-name');
+        const popupChakra = document.getElementById('popup-chakra');
+        const popupGlyph = document.getElementById('popup-glyph');
+        const popupCoords = document.getElementById('popup-coords');
+        const popupMantra = document.getElementById('popup-mantra');
+        let activeOutline = null;
+
+        function showPopup(data) {
+            popupName.innerText = data.name;
+            popupChakra.innerText = data.chakra;
+            popupGlyph.innerText = `${data.char} (${data.phonetic})`;
+            popupCoords.innerText = `X: ${data.excelPos[0].toFixed(1)}, Y: ${data.excelPos[1].toFixed(1)}, Z: ${data.excelPos[2].toFixed(1)}`;
+            popupMantra.textContent = data.mantra;
+            popupCard.classList.add('active');
+        }
+
+        function hidePopup() {
+            popupCard.classList.remove('active');
+            removeHighlight();
+        }
+
+        function highlightSphere(sphere) {
+            if (activeOutline) spheresGroup.remove(activeOutline);
+
+            const outlineGeo = new THREE.SphereGeometry(0.21, 16, 16);
+            const outlineMat = new THREE.MeshBasicMaterial({
+                color: 0xffd700, 
+                wireframe: true,
+                transparent: true,
+                opacity: 0.6
+            });
+            activeOutline = new THREE.Mesh(outlineGeo, outlineMat);
+            activeOutline.position.copy(sphere.position);
+            spheresGroup.add(activeOutline);
+        }
+
+        function removeHighlight() {
+            if (activeOutline) {
+                spheresGroup.remove(activeOutline);
+                activeOutline = null;
+            }
+        }
+
+        document.getElementById('popup-close').addEventListener('click', (e) => {
+            e.stopPropagation();
+            hidePopup();
+        });
+
+        function handlePointerDown(event) {
+            if (event.target.closest('#ui-container') || event.target.closest('#popup-card')) return;
+
+            const rect = renderer.domElement.getBoundingClientRect();
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+            mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(clickableSpheres);
+
+            if (intersects.length > 0) {
+                const targetSphere = intersects[0].object;
+                showPopup(targetSphere.userData);
+                highlightSphere(targetSphere);
+            } else {
+                hidePopup();
+            }
+        }
+
+        window.addEventListener('pointerdown', handlePointerDown);
+
+        // --- 12. UI Controls Binding ---
+        const billboardModeSelect = document.getElementById('billboard-mode');
+        const rotationSpeedInput = document.getElementById('rotation-speed');
+        const glowIntensityInput = document.getElementById('glow-intensity');
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- 13. Animation Loop ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+            const elapsedTime = clock.getElapsedTime();
+            
+            const rpm = parseFloat(rotationSpeedInput.value);
+            const rotSpeedRadPerSec = (rpm * Math.PI * 2) / 60;
+            const rotationStep = rotSpeedRadPerSec * delta;
+
+            // Smooth scene rotation locked together
+            spheresGroup.rotation.y += rotationStep;
+            buddhaGroup.rotation.y += rotationStep; 
+
+            // Update core breathing glow intensity (blue light)
+            const glowVal = parseFloat(glowIntensityInput.value);
+            coreLight.intensity = (Math.sin(elapsedTime * 2) * 0.3 + 1.0) * glowVal;
+
+            // --- 13a. Animate Single VA Sphere Character Glow ---
+            const mainSphere = clickableSpheres[0];
+            if (mainSphere) {
+                const breathing = Math.sin(elapsedTime * 2.0) * 0.5 + 0.5; 
+                mainSphere.userData.glow = THREE.MathUtils.lerp(mainSphere.userData.glow, breathing, 0.1);
+                
+                // Keep hit-box scaled with breathing
+                mainSphere.scale.setScalar(1.0 + (mainSphere.userData.glow * 0.2));
+                
+                // Dynamically breathe and glow the character plane itself
+                const mainPlane = characterPlanes[0].mesh;
+                if (mainPlane) {
+                    mainPlane.scale.setScalar(1.0 + (mainSphere.userData.glow * 0.15));
+                    // Modulate color brightness based on breathing cycle
+                    mainPlane.material.color.setRGB(
+                        1.0, 
+                        0.84 + mainSphere.userData.glow * 0.16, 
+                        0.0 + mainSphere.userData.glow * 0.3
+                    );
+                }
+            }
+
+            // --- 13b. Animate Golden Ripple Waves ---
+            ripples.forEach((ripple) => {
+                ripple.radius += rippleSpeed * delta;
+                
+                if (ripple.radius > maxRippleRadius) {
+                    ripple.radius = minRippleRadius;
+                }
+
+                ripple.mesh.scale.setScalar(ripple.radius);
+
+                // Smoother and tighter fade transitions for a seamless wave train
+                const lifeRatio = (ripple.radius - minRippleRadius) / (maxRippleRadius - minRippleRadius);
+                let opacity = 0.0;
+                
+                if (lifeRatio < 0.1) {
+                    opacity = lifeRatio / 0.1;
+                } else {
+                    opacity = 1.0 - (lifeRatio - 0.1) / 0.9;
+                }
+
+                ripple.material.uniforms.opacity.value = opacity * 0.45;
+            });
+
+            // Character plane floating animations
+            characterPlanes.forEach((item) => {
+                const floatOffset = Math.sin(elapsedTime * 1.5 + item.offset) * 0.01;
+                item.mesh.position.y = item.initialPos.y + floatOffset;
+
+                if (billboardModeSelect.value === 'billboard') {
+                    item.mesh.quaternion.copy(camera.quaternion);
+                } else {
+                    item.mesh.rotation.y = elapsedTime * 0.4 + item.offset;
+                    item.mesh.rotation.x = 0;
+                    item.mesh.rotation.z = 0;
+                }
+            });
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
