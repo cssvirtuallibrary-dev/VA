@@ -327,9 +327,9 @@
             { 
                 id: "va",
                 name: "VA (Center Core)", 
-                excelPos: [0.0, 0.0, 0.1], 
+                excelPos: [0.0, 0.1, 0.0], 
                 chakra: "1. Ever-present Compassion", 
-                image: "01_VA_Gold.png", 
+                image: "01_VA_Gold.PNG", 
                 char: "𑖪", 
                 phonetic: "Va",
                 mantra: `VA: ever-present compassion.
@@ -339,9 +339,9 @@ The syllable VA is always there, compassion is ever-present, whether clearly vis
             { 
                 id: "va_right",
                 name: "VÀ (Right Wing)", 
-                excelPos: [1.0, 0.0, 0.1], 
+                excelPos: [1.0, 0.1, 0.0], 
                 chakra: "2. Transcending Worldliness", 
-                image: "02_VAA_Gold.png", 
+                image: "02_VAA_Gold.PNG", 
                 char: "𑖪𑖯", 
                 phonetic: "Và",
                 mantra: `VÀ: the practice of compassion.
@@ -350,9 +350,9 @@ Inhale to VA and emanate energy, turning consciousness into loving energy radiat
             { 
                 id: "vu_bottom",
                 name: "VU (At the Back)", 
-                excelPos: [0.0, -1.0, 0.1], 
+                excelPos: [0.0, 1.0, 0.1], 
                 chakra: "3. Engaging with the World", 
-                image: "03_VU_Gold.png", 
+                image: "03_VU_Gold.PNG", 
                 char: "𑖪𑖲", 
                 phonetic: "Vu",
                 mantra: `VU: the practice of vows, expansion & transformation.
@@ -361,9 +361,9 @@ Direct your mind to open the hearts of all beings, engaging in the world to supp
             { 
                 id: "vam_left",
                 name: "VAM (Left Wing)", 
-                excelPos: [-1.0, 0.0, 0.1], 
+                excelPos: [-1.0, 0.1, 0.0], 
                 chakra: "4. Realizing Emptiness", 
-                image: "04_VAM_Gold.png", 
+                image: "04_VAM_Gold.PNG", 
                 char: "𑖪𑖽", 
                 phonetic: "Vam",
                 mantra: `VAM: the practice of being empty.
@@ -373,9 +373,9 @@ Become pure consciousness, realizing that compassion and emptiness are just one.
             { 
                 id: "vah_top",
                 name: "VAH (At the Front)", 
-                excelPos: [0.0, 1.0, 0.1], 
+                excelPos: [0.0, -1.0, 0.1], 
                 chakra: "5. Residing in Everyone's Heart", 
-                image: "05_VAH_Gold.png", 
+                image: "05_VAH_Gold.PNG", 
                 char: "𑖪𑖾", 
                 phonetic: "Vah",
                 mantra: `VAH: the practice of consummation.
@@ -384,9 +384,9 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
             { 
                 id: "vavm2",
                 name: "VAvm2 (Upgraded Core)", 
-                excelPos: [0.0, 0.0, 0.1], 
+                excelPos: [0.0, 0.1, 0.0], 
                 chakra: "6. Ultimate Upgraded Compassion", 
-                image: "06_VAvm2_Gold.png", 
+                image: "06_VAvm2_Gold.PNG", 
                 char: "𑖪", 
                 phonetic: "Vavm2",
                 mantra: `VAvm2: Upgraded ultimate state at the end of the 6-syllable cycle.
@@ -579,13 +579,23 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
         const clickableSpheres = []; 
         const textureLoader = new THREE.TextureLoader();
 
-        // Generates fallback texture containing absolute transparency (no text rendered)
-        function createFallbackGlyphTexture() {
+        // Generates elegant fallback texture with glowing Siddham text
+        function createFallbackGlyphTexture(char) {
             const canvas = document.createElement('canvas');
-            canvas.width = 16;
-            canvas.height = 16;
+            canvas.width = 512;
+            canvas.height = 512;
             const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, 16, 16); 
+
+            ctx.clearRect(0, 0, 512, 512);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            ctx.shadowColor = '#ffd700';
+            ctx.shadowBlur = 30;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 340px sans-serif'; 
+            ctx.fillText(char, 256, 256); 
+
             const tex = new THREE.CanvasTexture(canvas);
             tex.encoding = THREE.sRGBEncoding; 
             return tex;
@@ -593,8 +603,8 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
 
         sphereData.forEach((data) => {
             const x = data.excelPos[0];
-            const y = data.excelPos[2]; 
-            const z = data.excelPos[1]; 
+            const y = data.excelPos[1]; 
+            const z = data.excelPos[2]; 
             const pos = new THREE.Vector3(x, y, z);
 
             const sphereGeo = new THREE.SphereGeometry(0.19, 32, 32); 
@@ -610,7 +620,8 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
 
             const planeSize = 0.38; 
             const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
-            let characterTex = createFallbackGlyphTexture();
+            // Initialize with gold-glowing Siddham character fallback
+            let characterTex = createFallbackGlyphTexture(data.char);
 
             const charMaterial = new THREE.MeshBasicMaterial({
                 map: characterTex,
@@ -625,6 +636,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             plane.position.copy(pos);
             spheresGroup.add(plane);
 
+            // Attempt to load PNG image to replace the text fallback
             textureLoader.load(
                 data.image,
                 (loadedTex) => {
@@ -634,7 +646,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
                 },
                 undefined,
                 () => {
-                    console.warn(`PNG image failed to load for ${data.phonetic}`);
+                    console.log(`PNG failed to load. Displaying text fallback for ${data.phonetic}`);
                 }
             );
 
@@ -645,12 +657,12 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             });
         });
 
-        // --- 8b. Highly Dense Golden Spherical Ripple Wave Effect ---
+        // --- 8b. Highly Dense Golden Spherical Ripple Wave Effect (Slowed to 25% speed) ---
         const ripples = [];
         const numRipples = 18; 
         const minRippleRadius = 0.19; 
         const maxRippleRadius = 4.5;  
-        const rippleSpeed = 1.2;      
+        const rippleSpeed = 0.3; // Slowed down from 1.2 to 0.3 (25% speed)
 
         for (let i = 0; i < numRipples; i++) {
             const rippleGeo = new THREE.SphereGeometry(1, 32, 32);
