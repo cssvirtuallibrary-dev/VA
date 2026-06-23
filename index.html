@@ -341,7 +341,7 @@ The syllable VA is always there, compassion is ever-present, whether clearly vis
                 name: "VÀ (Right Wing)", 
                 excelPos: [1.0, 0.0, 0.1], 
                 chakra: "2. Transcending Worldliness", 
-                image: "02_VÀ_Gold.png", 
+                image: "02_VAA_Gold.png", 
                 char: "𑖪𑖯", 
                 phonetic: "Và",
                 mantra: `VÀ: the practice of compassion.
@@ -349,8 +349,8 @@ Inhale to VA and emanate energy, turning consciousness into loving energy radiat
             },
             { 
                 id: "vu_bottom",
-                name: "VU (Bottom Wing)", 
-                excelPos: [0.0, 0.0, -0.9], 
+                name: "VU (At the Back)", 
+                excelPos: [0.0, -1.0, 0.1], 
                 chakra: "3. Engaging with the World", 
                 image: "03_VU_Gold.png", 
                 char: "𑖪𑖲", 
@@ -372,8 +372,8 @@ Become pure consciousness, realizing that compassion and emptiness are just one.
             },
             { 
                 id: "vah_top",
-                name: "VAH (Top Wing)", 
-                excelPos: [0.0, 0.0, 1.1], 
+                name: "VAH (At the Front)", 
+                excelPos: [0.0, 1.0, 0.1], 
                 chakra: "5. Residing in Everyone's Heart", 
                 image: "05_VAH_Gold.png", 
                 char: "𑖪𑖾", 
@@ -409,7 +409,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.2;
-        renderer.outputEncoding = THREE.sRGBEncoding; // Set sRGB output encoding for vibrant colors
+        renderer.outputEncoding = THREE.sRGBEncoding; 
         container.appendChild(renderer.domElement);
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -463,32 +463,6 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
         const coreLight = new THREE.PointLight(0x00aaff, 2.0, 5); 
         coreLight.position.set(0, 0, 0);
         scene.add(coreLight);
-
-        // --- 4b. Add X, Y, Z Coordinate Helper Lines (WebGL r128 Compatible) ---
-        const axesHelper = new THREE.AxesHelper(3.0);
-        // Note: setColors() is removed to prevent crashes in r128. Default Red (+X), Green (+Y), Blue (+Z) are used.
-        scene.add(axesHelper);
-
-        function createAxisLabel(text, pos, color) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 128;
-            canvas.height = 128;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = color;
-            ctx.font = 'bold 80px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(text, 64, 64);
-            const tex = new THREE.CanvasTexture(canvas);
-            const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-            const sprite = new THREE.Sprite(mat);
-            sprite.position.copy(pos);
-            sprite.scale.set(0.35, 0.35, 0.35);
-            scene.add(sprite);
-        }
-        createAxisLabel('X', new THREE.Vector3(3.2, 0, 0), '#ff3333');
-        createAxisLabel('Y', new THREE.Vector3(0, 3.2, 0), '#33ff33');
-        createAxisLabel('Z', new THREE.Vector3(0, 0, 3.2), '#3333ff');
 
         // --- 5. Materials Setup ---
         const privacyBlueGlass = new THREE.MeshPhysicalMaterial({
@@ -605,24 +579,15 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
         const clickableSpheres = []; 
         const textureLoader = new THREE.TextureLoader();
 
-        function createFallbackGlyphTexture(char) {
+        // Generates fallback texture containing absolute transparency (no text rendered)
+        function createFallbackGlyphTexture() {
             const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
+            canvas.width = 16;
+            canvas.height = 16;
             const ctx = canvas.getContext('2d');
-
-            ctx.clearRect(0, 0, 512, 512);
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            ctx.shadowColor = '#ffd700';
-            ctx.shadowBlur = 30;
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 340px sans-serif'; 
-            ctx.fillText(char, 256, 256); 
-
+            ctx.clearRect(0, 0, 16, 16); 
             const tex = new THREE.CanvasTexture(canvas);
-            tex.encoding = THREE.sRGBEncoding; // Compatibility fix for r128
+            tex.encoding = THREE.sRGBEncoding; 
             return tex;
         }
 
@@ -645,7 +610,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
 
             const planeSize = 0.38; 
             const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
-            let characterTex = createFallbackGlyphTexture(data.char);
+            let characterTex = createFallbackGlyphTexture();
 
             const charMaterial = new THREE.MeshBasicMaterial({
                 map: characterTex,
@@ -653,7 +618,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
                 side: THREE.DoubleSide,
                 depthWrite: false,
                 blending: THREE.AdditiveBlending,
-                opacity: 0.3
+                opacity: 0.0
             });
 
             const plane = new THREE.Mesh(planeGeo, charMaterial);
@@ -663,13 +628,13 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             textureLoader.load(
                 data.image,
                 (loadedTex) => {
-                    loadedTex.encoding = THREE.sRGBEncoding; // Compatibility fix for r128
+                    loadedTex.encoding = THREE.sRGBEncoding; 
                     charMaterial.map = loadedTex;
                     charMaterial.needsUpdate = true;
                 },
                 undefined,
                 () => {
-                    console.log(`Using procedural fallback texture for ${data.phonetic}`);
+                    console.warn(`PNG image failed to load for ${data.phonetic}`);
                 }
             );
 
@@ -808,11 +773,10 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
 
             raycaster.setFromCamera(mouse, camera);
 
-            // Filter active clickable siblings at the center core (VA vs VAvm2) depending on active step
-            const activeClickable = clickableSpheres.filter(sphere => {
-                if (sphere.userData.id === 'va' && currentSeqIndex === 5) return false;
-                if (sphere.userData.id === 'vavm2' && currentSeqIndex !== 5) return false;
-                return true;
+            // Filter active clickable siblings so users click only on currently visible elements
+            const activeClickable = clickableSpheres.filter((sphere, idx) => {
+                const plane = characterPlanes[idx].mesh;
+                return plane && plane.material.opacity > 0.1;
             });
 
             const intersects = raycaster.intersectObjects(activeClickable);
@@ -839,71 +803,80 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // --- 13. Sequential Lighting 6-Syllable Matrix Configuration ---
+        // --- 13. Sequential Timing State Machine Configuration ---
         const sequenceStages = [
-            { id: "va" },        
-            { id: "va_right" },  
-            { id: "vu_bottom" }, 
-            { id: "vam_left" },  
-            { id: "vah_top" },   
-            { id: "vavm2" }      
+            { id: "va", duration: 1.8 },        // 1. VA
+            { id: "va_right", duration: 1.8 },  // 2. VÀ
+            { id: "vu_bottom", duration: 1.8 }, // 3. VU
+            { id: "vam_left", duration: 1.8 },  // 4. VAM
+            { id: "vah_top", duration: 1.8 },   // 5. VAH
+            { id: "clear", duration: 3.0 },     // 3s delay with all syllables cleared out
+            { id: "vavm2", duration: 10.0 }     // 6. VAvm2 active at center core for 10s
         ];
 
         let currentSeqIndex = 0;
         let seqTimer = 0;
-        const seqStepDuration = 1.8;    
-        const seqPauseDuration = 2.2;   
-        let isSeqPaused = false;
 
         function updateSequentialLighting(delta) {
             seqTimer += delta;
-            const currentDuration = isSeqPaused ? seqPauseDuration : seqStepDuration;
+            let currentStage = sequenceStages[currentSeqIndex];
 
-            if (seqTimer >= currentDuration) {
+            if (seqTimer >= currentStage.duration) {
                 seqTimer = 0;
-                if (isSeqPaused) {
-                    isSeqPaused = false;
-                    currentSeqIndex = 0; 
-                } else {
-                    currentSeqIndex++;
-                    if (currentSeqIndex >= sequenceStages.length) {
-                        isSeqPaused = true;
-                        currentSeqIndex = -1; 
-                    }
-                }
+                currentSeqIndex = (currentSeqIndex + 1) % sequenceStages.length;
+                currentStage = sequenceStages[currentSeqIndex];
             }
 
-            const activeStage = (currentSeqIndex !== -1) ? sequenceStages[currentSeqIndex] : null;
+            const activeId = currentStage.id;
 
             clickableSpheres.forEach((sphere, index) => {
                 const data = sphere.userData;
-                const isTarget = activeStage && data.id === activeStage.id;
-
-                const targetGlow = isTarget ? 1.0 : 0.0;
-                sphere.userData.glow = THREE.MathUtils.lerp(sphere.userData.glow, targetGlow, 0.1);
-
                 const plane = characterPlanes[index].mesh;
-                if (plane) {
-                    plane.scale.setScalar(1.0 + (sphere.userData.glow * 0.25)); 
+                if (!plane) return;
 
-                    // Opacity blending to prevent overlapping artifacts for VA / VAvm2 at Center
-                    if (data.id === 'va') {
-                        const targetOpacity = (currentSeqIndex === 5) ? 0.0 : (isTarget ? 1.0 : 0.3);
-                        plane.material.opacity = THREE.MathUtils.lerp(plane.material.opacity, targetOpacity, 0.1);
-                    } else if (data.id === 'vavm2') {
-                        const targetOpacity = (currentSeqIndex === 5) ? 1.0 : 0.0;
-                        plane.material.opacity = THREE.MathUtils.lerp(plane.material.opacity, targetOpacity, 0.1);
+                let targetGlow = 0.0;
+                let targetOpacity = 0.0;
+
+                if (activeId === "clear") {
+                    // Stage 6: Clear out all syllables completely
+                    targetGlow = 0.0;
+                    targetOpacity = 0.0;
+                } else if (activeId === "vavm2") {
+                    // Stage 7: Display ONLY the 6th syllable (VAvm2) for 10s. Clear all others.
+                    if (data.id === "vavm2") {
+                        targetGlow = 1.0;
+                        targetOpacity = 1.0;
                     } else {
-                        const targetOpacity = isTarget ? 1.0 : 0.3;
-                        plane.material.opacity = THREE.MathUtils.lerp(plane.material.opacity, targetOpacity, 0.1);
+                        targetGlow = 0.0;
+                        targetOpacity = 0.0;
                     }
-
-                    plane.material.color.setRGB(
-                        1.0, 
-                        0.84 + sphere.userData.glow * 0.16, 
-                        0.0 + sphere.userData.glow * 0.3
-                    );
+                } else {
+                    // Stages 1 to 5: VA, VÀ, VU, VAM, VAH
+                    // vavm2 must be completely hidden during stages 1-5
+                    if (data.id === "vavm2") {
+                        targetGlow = 0.0;
+                        targetOpacity = 0.0;
+                    } else {
+                        if (data.id === activeId) {
+                            targetGlow = 1.0;
+                            targetOpacity = 1.0;
+                        } else {
+                            targetGlow = 0.0;
+                            targetOpacity = 0.3; // Dimmed background state
+                        }
+                    }
                 }
+
+                sphere.userData.glow = THREE.MathUtils.lerp(sphere.userData.glow, targetGlow, 0.1);
+                plane.scale.setScalar(1.0 + (sphere.userData.glow * 0.25));
+                plane.material.opacity = THREE.MathUtils.lerp(plane.material.opacity, targetOpacity, 0.1);
+
+                // Shift color to bright gold when active
+                plane.material.color.setRGB(
+                    1.0, 
+                    0.84 + sphere.userData.glow * 0.16, 
+                    0.0 + sphere.userData.glow * 0.3
+                );
             });
         }
 
@@ -928,7 +901,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             const glowVal = parseFloat(glowIntensityInput.value);
             coreLight.intensity = (Math.sin(elapsedTime * 2) * 0.3 + 1.0) * glowVal;
 
-            // Run sequential 6-syllable lighting animation loop
+            // Run sequential lighting state machine
             updateSequentialLighting(delta);
 
             // --- 14b. Animate Golden Ripple Waves ---
