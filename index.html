@@ -308,6 +308,8 @@
     //             VAH (front, Z = +1)
     //
     //    Sequence: VA → VÀ → VAM → VU → VAH → [clear] → VAvm2
+    //
+    //    CHANGE: Corrected image filenames for VAM and VU.
     // ================================================================
     const sphereData = [
         {
@@ -323,7 +325,7 @@
         {
             id: 'va_left',
             name: 'VÀ (Left Wing)',
-            pos: [-1.0, 0.1, 0.0],              // Left  (-X axis)
+            pos: [-1.0, 0.1, 0.0],
             chakra: '2. Transcending Worldliness',
             image: '02_VAA_Gold.PNG',
             char: '𑖪𑖯',
@@ -333,9 +335,9 @@
         {
             id: 'vam_back',
             name: 'VAM (At the Back)',
-            pos: [0.0, 0.1, -1.0],              // Back  (-Z axis)
+            pos: [0.0, 0.1, -1.0],
             chakra: '3. Realizing Emptiness',
-            image: '04_VAM_Gold.PNG',
+            image: '03_VAM_Gold.PNG',             // CHANGE: was 04_VAM_Gold.PNG
             char: '𑖪𑖽',
             phonetic: 'Vam',
             mantra: 'VAM: the practice of being empty.\n"Let me become the wave."\nBecome pure consciousness, realizing that compassion and emptiness are just one.'
@@ -343,9 +345,9 @@
         {
             id: 'vu_right',
             name: 'VU (Right Wing)',
-            pos: [1.0, 0.1, 0.0],               // Right (+X axis)
+            pos: [1.0, 0.1, 0.0],
             chakra: '4. Engaging with the World',
-            image: '03_VU_Gold.PNG',
+            image: '04_VU_Gold.PNG',              // CHANGE: was 03_VU_Gold.PNG
             char: '𑖪𑖲',
             phonetic: 'Vu',
             mantra: 'VU: the practice of vows, expansion & transformation.\nDirect your mind to open the hearts of all beings, engaging in the world to support and care for others.'
@@ -353,7 +355,7 @@
         {
             id: 'vah_front',
             name: 'VAH (At the Front)',
-            pos: [0.0, 0.1, 1.0],               // Front (+Z axis)
+            pos: [0.0, 0.1, 1.0],
             chakra: '5. Residing in Everyone\'s Heart',
             image: '05_VAH_Gold.PNG',
             char: '𑖪𑖾',
@@ -363,7 +365,7 @@
         {
             id: 'vavm2',
             name: 'VAvm2 (Upgraded Core)',
-            pos: [0.0, 0.1, 0.0],               // Center — overlaps VA for stage 6
+            pos: [0.0, 0.1, 0.0],
             chakra: '6. Ultimate Upgraded Compassion',
             image: '06_VAvm2_Gold.PNG',
             char: '𑖪',
@@ -374,6 +376,10 @@
 
     // ================================================================
     // 2. SCENE, CAMERA, RENDERER
+    //    CHANGE: Camera position X and Z signs flipped to rotate the
+    //    initial view 180 degrees around the Y axis.
+    //    Before: (-0.347, 0.8, -1.97)
+    //    After:  ( 0.347, 0.8,  1.97)
     // ================================================================
     const container = document.getElementById('canvas-container');
 
@@ -381,7 +387,7 @@
     scene.fog = new THREE.FogExp2(0x05070a, 0.05);
 
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(-0.347, 0.8, -1.97);
+    camera.position.set(0.347, 0.8, 1.97);         // CHANGE: rotated 180° from (-0.347, 0.8, -1.97)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -470,6 +476,11 @@
 
     // ================================================================
     // 7. BUDDHA MODEL
+    //    CHANGE: Buddha rotation.y updated from Math.PI / 2 to
+    //    -Math.PI / 2 (i.e., +180°) in both the GLB success path
+    //    and the procedural fallback figure.
+    //    Before: Math.PI / 2  (90°)
+    //    After: -Math.PI / 2  (270°, equivalent to 90° + 180°)
     // ================================================================
     const buddhaGroup = new THREE.Group();
     scene.add(buddhaGroup);
@@ -477,6 +488,7 @@
     const loadingOverlay = document.getElementById('loading-overlay');
     const loadingText    = document.getElementById('loading-text');
 
+    // Shared dismiss helper — avoids duplicated fade logic
     function dismissLoading(delay = 0) {
         setTimeout(() => {
             loadingOverlay.style.opacity = 0;
@@ -484,6 +496,7 @@
         }, delay);
     }
 
+    // Procedural fallback figure used when GLB is unavailable
     function buildFallbackFigure() {
         const g = new THREE.Group();
         const head  = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), matBlueGlass);
@@ -495,7 +508,7 @@
         legs.position.y = -0.25;
         g.add(head, torso, legs);
         g.position.set(0.0, -0.5, -0.18);
-        g.rotation.y = Math.PI / 2;
+        g.rotation.y = -Math.PI / 2;                // CHANGE: was Math.PI / 2
         return g;
     }
 
@@ -510,7 +523,7 @@
             });
             gltf.scene.scale.setScalar(1.4);
             gltf.scene.position.set(0.0, -0.5, -0.18);
-            gltf.scene.rotation.y = Math.PI / 2;
+            gltf.scene.rotation.y = -Math.PI / 2;   // CHANGE: was Math.PI / 2
             buddhaGroup.add(gltf.scene);
             dismissLoading();
         },
@@ -529,10 +542,7 @@
 
     // ================================================================
     // 8. SYLLABLE SPHERES & CHARACTER PLANES
-    //    Optimizations applied:
-    //      • sharedHitboxGeo  — one SphereGeometry reused for all 6 hitboxes
-    //      • sharedPlaneGeo   — one PlaneGeometry reused for all 6 glyphs
-    //      • Fallback canvas textures generated once per glyph
+    //    Shared geometries prevent redundant GPU buffer allocations.
     // ================================================================
     const spheresGroup = new THREE.Group();
     scene.add(spheresGroup);
@@ -564,14 +574,14 @@
     sphereData.forEach((data) => {
         const pos = new THREE.Vector3(...data.pos);
 
-        // Invisible hitbox
+        // Invisible hitbox sphere
         const sphere = new THREE.Mesh(sharedHitboxGeo, matHitbox);
         sphere.position.copy(pos);
         sphere.userData = { ...data, glow: 0.0 };
         spheresGroup.add(sphere);
         clickableSpheres.push(sphere);
 
-        // Glyph plane
+        // Glyph plane — starts with canvas fallback, replaced by PNG if available
         const charMat = new THREE.MeshBasicMaterial({
             map: createFallbackGlyphTexture(data.char),
             transparent: true,
@@ -585,7 +595,6 @@
         plane.position.copy(pos);
         spheresGroup.add(plane);
 
-        // Attempt PNG load — silently fall back to canvas glyph on failure
         textureLoader.load(
             data.image,
             (tex) => { tex.encoding = THREE.sRGBEncoding; charMat.map = tex; charMat.needsUpdate = true; },
@@ -598,16 +607,14 @@
 
     // ================================================================
     // 8b. GOLDEN RIPPLE WAVES
-    //     Optimization: sharedRippleGeo — one SphereGeometry(1, 24, 24)
-    //     reused across all 18 meshes. Segments reduced 32→24 (imperceptible
-    //     on transparent shells). Each mesh retains its own ShaderMaterial
-    //     for independent opacity uniforms.
+    //     sharedRippleGeo reused across all 18 meshes.
+    //     Each mesh keeps its own ShaderMaterial for independent opacity.
     // ================================================================
-    const ripples        = [];
-    const NUM_RIPPLES    = 18;
-    const RIPPLE_MIN     = 0.19;
-    const RIPPLE_MAX     = 4.5;
-    const RIPPLE_SPEED   = 0.3;
+    const ripples         = [];
+    const NUM_RIPPLES     = 18;
+    const RIPPLE_MIN      = 0.19;
+    const RIPPLE_MAX      = 4.5;
+    const RIPPLE_SPEED    = 0.3;
     const sharedRippleGeo = new THREE.SphereGeometry(1, 24, 24);
 
     for (let i = 0; i < NUM_RIPPLES; i++) {
@@ -668,24 +675,24 @@
 
     // ================================================================
     // 11. CACHED UI CONTROL VALUES
-    //     Optimization: read DOM inputs once on change, not every frame.
+    //     Read DOM inputs once on change, not every animation frame.
     // ================================================================
-    const rotationSpeedInput = document.getElementById('rotation-speed');
-    const glowIntensityInput = document.getElementById('glow-intensity');
+    const rotationSpeedInput  = document.getElementById('rotation-speed');
+    const glowIntensityInput  = document.getElementById('glow-intensity');
     const billboardModeSelect = document.getElementById('billboard-mode');
 
-    let cachedRPM          = parseFloat(rotationSpeedInput.value);
-    let cachedGlow         = parseFloat(glowIntensityInput.value);
-    let cachedBillboard    = billboardModeSelect.value;
+    let cachedRPM       = parseFloat(rotationSpeedInput.value);
+    let cachedGlow      = parseFloat(glowIntensityInput.value);
+    let cachedBillboard = billboardModeSelect.value;
 
-    rotationSpeedInput.addEventListener('input',  () => { cachedRPM       = parseFloat(rotationSpeedInput.value); });
-    glowIntensityInput.addEventListener('input',  () => { cachedGlow      = parseFloat(glowIntensityInput.value); });
-    billboardModeSelect.addEventListener('change',() => { cachedBillboard = billboardModeSelect.value; });
+    rotationSpeedInput.addEventListener('input',   () => { cachedRPM       = parseFloat(rotationSpeedInput.value); });
+    glowIntensityInput.addEventListener('input',   () => { cachedGlow      = parseFloat(glowIntensityInput.value); });
+    billboardModeSelect.addEventListener('change', () => { cachedBillboard = billboardModeSelect.value; });
 
     // ================================================================
     // 12. RAYCASTING & POPUP
-    //     Optimization: outline mesh created once, toggled via .visible —
-    //     no per-click geometry/material allocation or GC pressure.
+    //     Outline mesh created once, repositioned and toggled via
+    //     .visible — no per-click geometry or material allocation.
     // ================================================================
     const raycaster   = new THREE.Raycaster();
     const mouse       = new THREE.Vector2();
@@ -704,10 +711,10 @@
     spheresGroup.add(outlineMesh);
 
     function showPopup(data) {
-        popupName.innerText   = data.name;
-        popupChakra.innerText = data.chakra;
-        popupGlyph.innerText  = `${data.char} (${data.phonetic})`;
-        popupCoords.innerText = `X: ${data.pos[0].toFixed(1)}, Y: ${data.pos[1].toFixed(1)}, Z: ${data.pos[2].toFixed(1)}`;
+        popupName.innerText     = data.name;
+        popupChakra.innerText   = data.chakra;
+        popupGlyph.innerText    = `${data.char} (${data.phonetic})`;
+        popupCoords.innerText   = `X: ${data.pos[0].toFixed(1)}, Y: ${data.pos[1].toFixed(1)}, Z: ${data.pos[2].toFixed(1)}`;
         popupMantra.textContent = data.mantra;
         popupCard.classList.add('active');
     }
@@ -729,8 +736,8 @@
         const clientX = event.touches ? event.touches[0].clientX : event.clientX;
         const clientY = event.touches ? event.touches[0].clientY : event.clientY;
 
-        mouse.x = ((clientX - rect.left) / rect.width)  *  2 - 1;
-        mouse.y = ((clientY - rect.top)  / rect.height) * -2 + 1;
+        mouse.x =  ((clientX - rect.left) / rect.width)  * 2 - 1;
+        mouse.y = -((clientY - rect.top)  / rect.height) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
 
@@ -749,7 +756,6 @@
 
     // ================================================================
     // 13. DEBOUNCED RESIZE
-    //     Optimization: batches rapid resize events into one callback.
     // ================================================================
     let resizeTimer;
     window.addEventListener('resize', () => {
@@ -764,24 +770,23 @@
     // ================================================================
     // 14. SEQUENCE STATE MACHINE
     //     Counterclockwise order (viewed from above):
-    //       VA (center) → VÀ (left) → VAM (back) → VU (right) → VAH (front)
+    //       VA → VÀ (left) → VAM (back) → VU (right) → VAH (front)
     //       → [clear] → VAvm2
     // ================================================================
     const sequenceStages = [
-        { id: 'va',       duration: 1.8 },  // 1. VA      — center
-        { id: 'va_left',  duration: 1.8 },  // 2. VÀ      — left  (-X)
-        { id: 'vam_back', duration: 1.8 },  // 3. VAM     — back  (-Z)
-        { id: 'vu_right', duration: 1.8 },  // 4. VU      — right (+X)
-        { id: 'vah_front',duration: 1.8 },  // 5. VAH     — front (+Z)
-        { id: 'clear',    duration: 3.0 },  //    pause   — all hidden
-        { id: 'vavm2',    duration: 10.0 }  // 6. VAvm2   — center (upgraded)
+        { id: 'va',        duration: 1.8  },  // 1. VA      — center
+        { id: 'va_left',   duration: 1.8  },  // 2. VÀ      — left  (-X)
+        { id: 'vam_back',  duration: 1.8  },  // 3. VAM     — back  (-Z)
+        { id: 'vu_right',  duration: 1.8  },  // 4. VU      — right (+X)
+        { id: 'vah_front', duration: 1.8  },  // 5. VAH     — front (+Z)
+        { id: 'clear',     duration: 3.0  },  //    pause   — all hidden
+        { id: 'vavm2',     duration: 10.0 }   // 6. VAvm2   — center (upgraded)
     ];
 
     let seqIndex = 0;
     let seqTimer = 0;
 
-    // Frame-rate independent lerp: alpha = 1 - e^(-delta / halfLife)
-    // Ensures consistent transition speed across all refresh rates.
+    // Frame-rate independent lerp: consistent speed across all refresh rates
     const LERP_HALF_LIFE = 0.1; // seconds
 
     function updateSequence(delta) {
@@ -800,11 +805,10 @@
             let targetGlow = 0.0, targetOpacity = 0.0;
 
             if (activeId === 'clear') {
-                // All hidden — targetGlow and targetOpacity remain 0
+                // All hidden — targets remain 0
             } else if (activeId === 'vavm2') {
                 if (id === 'vavm2') { targetGlow = 1.0; targetOpacity = 1.0; }
             } else {
-                // Stages 1–5: hide vavm2, dim non-active syllables
                 if (id !== 'vavm2') {
                     if (id === activeId) {
                         targetGlow    = 1.0;
@@ -815,8 +819,8 @@
                 }
             }
 
-            sphere.userData.glow        = THREE.MathUtils.lerp(sphere.userData.glow, targetGlow, lerpAlpha);
-            plane.material.opacity      = THREE.MathUtils.lerp(plane.material.opacity, targetOpacity, lerpAlpha);
+            sphere.userData.glow   = THREE.MathUtils.lerp(sphere.userData.glow, targetGlow, lerpAlpha);
+            plane.material.opacity = THREE.MathUtils.lerp(plane.material.opacity, targetOpacity, lerpAlpha);
             plane.scale.setScalar(1.0 + sphere.userData.glow * 0.25);
             plane.material.color.setRGB(
                 1.0,
@@ -838,14 +842,11 @@
         const elapsed     = clock.getElapsedTime();
         const rotPerFrame = (cachedRPM * Math.PI * 2 / 60) * delta;
 
-        // Rotate scene groups together
         spheresGroup.rotation.y += rotPerFrame;
         buddhaGroup.rotation.y  += rotPerFrame;
 
-        // Breathing core glow
         coreLight.intensity = (Math.sin(elapsed * 2) * 0.3 + 1.0) * cachedGlow;
 
-        // Sequence state machine
         updateSequence(delta);
 
         // Ripple waves
@@ -856,10 +857,8 @@
 
             r.mesh.scale.setScalar(r.radius);
 
-            const life = (r.radius - RIPPLE_MIN) / rippleRange;
-            const opacity = life < 0.1
-                ? life / 0.1
-                : 1.0 - (life - 0.1) / 0.9;
+            const life    = (r.radius - RIPPLE_MIN) / rippleRange;
+            const opacity = life < 0.1 ? life / 0.1 : 1.0 - (life - 0.1) / 0.9;
             r.material.uniforms.opacity.value = opacity * 0.45;
         });
 
@@ -884,3 +883,4 @@
     </script>
 </body>
 </html>
+
