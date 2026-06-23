@@ -312,13 +312,12 @@
 
     <script>
         // --- 1. Coordinate, Asset & Mantra Data Mapping ---
-        // 5 Syllables mapped to their respective 3D coordinates around the Buddha's heart center (0, 0.1, 0)
         const sphereData = [
             { 
                 name: "VA (Center Core)", 
-                excelPos: [0.0, 0.0, 0.1], // Mapped to (0.0, 0.1, 0.0)
+                excelPos: [0.0, 0.0, 0.1], 
                 chakra: "1. Ever-present Compassion", 
-                image: "06_VAvm2_Gold.png", // Replaced 01_VA_Gold.png
+                image: "06_VAvm2_Gold.png", 
                 char: "𑖪", 
                 phonetic: "Va",
                 mantra: `VA: ever-present compassion.
@@ -327,7 +326,7 @@ The syllable VA is always there, compassion is ever-present, whether clearly vis
             },
             { 
                 name: "VÀ (Right Wing)", 
-                excelPos: [1.0, 0.0, 0.1], // Mapped to (1.0, 0.1, 0.0)
+                excelPos: [1.0, 0.0, 0.1], 
                 chakra: "2. Transcending Worldliness", 
                 image: "02_VÀ_Gold.png", 
                 char: "𑖪𑖯", 
@@ -337,7 +336,7 @@ Inhale to VA and emanate energy, turning consciousness into loving energy radiat
             },
             { 
                 name: "VU (Bottom Wing)", 
-                excelPos: [0.0, 0.0, -0.9], // Mapped to (0.0, -0.9, 0.0)
+                excelPos: [0.0, 0.0, -0.9], 
                 chakra: "3. Engaging with the World", 
                 image: "03_VU_Gold.png", 
                 char: "𑖪𑖲", 
@@ -347,7 +346,7 @@ Direct your mind to open the hearts of all beings, engaging in the world to supp
             },
             { 
                 name: "VAM (Left Wing)", 
-                excelPos: [-1.0, 0.0, 0.1], // Mapped to (-1.0, 0.1, 0.0)
+                excelPos: [-1.0, 0.0, 0.1], 
                 chakra: "4. Realizing Emptiness", 
                 image: "04_VAM_Gold.png", 
                 char: "𑖪𑖽", 
@@ -358,7 +357,7 @@ Become pure consciousness, realizing that compassion and emptiness are just one.
             },
             { 
                 name: "VAH (Top Wing)", 
-                excelPos: [0.0, 0.0, 1.1], // Mapped to (0.0, 1.1, 0.0)
+                excelPos: [0.0, 0.0, 1.1], 
                 chakra: "5. Residing in Everyone's Heart", 
                 image: "05_VAH_Gold.png", 
                 char: "𑖪𑖾", 
@@ -374,7 +373,6 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
         scene.fog = new THREE.FogExp2(0x05070a, 0.05);
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        // Default view angle rotated 190 degrees around Y-axis: (-0.347, 0.8, -1.97)
         camera.position.set(-0.347, 0.8, -1.97);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
@@ -391,7 +389,7 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
         controls.dampingFactor = 0.05;
         controls.maxDistance = 12;
         controls.minDistance = 0.5; 
-        controls.target.set(0, 0.1, 0); // Focus directly on the shifted VA sphere position
+        controls.target.set(0, 0.1, 0); 
 
         // --- 3. Procedural Studio Environment Map ---
         function createStudioEnvMap() {
@@ -438,9 +436,8 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
         coreLight.position.set(0, 0, 0);
         scene.add(coreLight);
 
-        // --- 4b. Add X, Y, Z Coordinate Helper Lines with Custom Floating Tip Labels ---
+        // --- 4b. Add X, Y, Z Coordinate Helper Lines ---
         const axesHelper = new THREE.AxesHelper(3.0);
-        // Custom colors matching high-end technical guidelines
         axesHelper.setColors(new THREE.Color(0xff3333), new THREE.Color(0x33ff33), new THREE.Color(0x3333ff));
         scene.add(axesHelper);
 
@@ -494,7 +491,6 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
             depthWrite: false
         });
 
-        // Completely transparent material for the clickable sphere bounds
         const invisibleHitboxMaterial = new THREE.MeshBasicMaterial({
             transparent: true,
             opacity: 0.0,
@@ -508,7 +504,7 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
 
         // --- 7. Loading the 3D Buddha Model ---
         const buddhaGroup = new THREE.Group();
-        scene.add(buddhaGroup);
+        scene.add(buddhaGroup); 
 
         const loader = new THREE.GLTFLoader();
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -532,7 +528,7 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
                 buddhaMesh.position.set(0.0, -0.5, -0.18); 
                 buddhaMesh.rotation.y = Math.PI / 2; 
                 
-                buddhaGroup.add(buddhaMesh);
+                buddhaGroup.add(buddhaMesh); // FIXED: Corrected reference from buddGroup to buddhaGroup
                 
                 loadingOverlay.style.opacity = 0;
                 setTimeout(() => { loadingOverlay.style.display = 'none'; }, 600);
@@ -581,7 +577,6 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
         const clickableSpheres = []; 
         const textureLoader = new THREE.TextureLoader();
 
-        // Generates fallback texture containing ONLY the centered, maximized character image (No phonetic text)
         function createFallbackGlyphTexture(char) {
             const canvas = document.createElement('canvas');
             canvas.width = 512;
@@ -595,8 +590,8 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
             ctx.shadowColor = '#ffd700';
             ctx.shadowBlur = 30;
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 340px sans-serif'; // Maximized font size
-            ctx.fillText(char, 256, 256); // Centered vertically
+            ctx.font = 'bold 340px sans-serif'; 
+            ctx.fillText(char, 256, 256); 
 
             const tex = new THREE.CanvasTexture(canvas);
             tex.colorSpace = THREE.SRGBColorSpace;
@@ -611,7 +606,6 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
 
             const sphereGeo = new THREE.SphereGeometry(0.19, 32, 32); 
             
-            // Use completely transparent hit-box mesh so only the character image displays
             const sphere = new THREE.Mesh(sphereGeo, invisibleHitboxMaterial);
             sphere.position.copy(pos);
             sphere.userData = { 
@@ -621,7 +615,6 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
             spheresGroup.add(sphere);
             clickableSpheres.push(sphere);
 
-            // Maximized plane size to exactly fill the sphere boundary (0.19 radius * 2 = 0.38 plane size)
             const planeSize = 0.38; 
             const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
             let characterTex = createFallbackGlyphTexture(data.char);
@@ -647,7 +640,7 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
                 },
                 undefined,
                 () => {
-                    console.log(`Using procedural high-fidelity gold texture fallback for ${data.phonetic}`);
+                    console.log(`Using procedural fallback texture for ${data.phonetic}`);
                 }
             );
 
@@ -658,12 +651,12 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
             });
         });
 
-        // --- 8b. Highly Dense Golden Spherical Ripple Wave Effect (At least 6 displaying at anytime) ---
+        // --- 8b. Highly Dense Golden Spherical Ripple Wave Effect ---
         const ripples = [];
-        const numRipples = 15; // Increased to 15 to ensure high density and continuous wave-trains
-        const minRippleRadius = 0.19; // Starts at central VA sphere surface
-        const maxRippleRadius = 4.5;  // Spreads far beyond outer bubble (radius 2.1)
-        const rippleSpeed = 1.2;      // Speed of expansion
+        const numRipples = 15; 
+        const minRippleRadius = 0.19; 
+        const maxRippleRadius = 4.5;  
+        const rippleSpeed = 1.2;      
 
         for (let i = 0; i < numRipples; i++) {
             const rippleGeo = new THREE.SphereGeometry(1, 32, 32);
@@ -696,13 +689,11 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
             });
 
             const rippleMesh = new THREE.Mesh(rippleGeo, rippleMat);
-            // Anchor at shifted central VA sphere location (0.0, 0.1, 0.0)
             rippleMesh.position.set(0.0, 0.1, 0.0); 
             scene.add(rippleMesh);
 
             ripples.push({
                 mesh: rippleMesh,
-                // Evenly stagger starting radii across the spectrum to keep at least 6-8 distinct visible rings
                 radius: minRippleRadius + (i * (maxRippleRadius - minRippleRadius) / numRipples),
                 material: rippleMat
             });
@@ -812,13 +803,12 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
         });
 
         // --- 13. Sequential Lighting Matrix Configuration ---
-        // Cycle coordinates matching the active positions of the 5 Shingon syllables
         const sequenceCoordinates = [
-            [0.0, 0.0, 0.1],   // 1. VA (Center)
-            [1.0, 0.0, 0.1],   // 2. VÀ (Right)
-            [0.0, 0.0, -0.9],  // 3. VU (Bottom)
-            [-1.0, 0.0, 0.1],  // 4. VAM (Left)
-            [0.0, 0.0, 1.1]    // 5. VAH (Top)
+            [0.0, 0.0, 0.1],   
+            [1.0, 0.0, 0.1],   
+            [0.0, 0.0, -0.9],  
+            [-1.0, 0.0, 0.1],  
+            [0.0, 0.0, 1.1]    
         ];
 
         let currentSeqIndex = 0;
@@ -857,11 +847,9 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
                 const targetGlow = isTarget ? 1.0 : 0.0;
                 sphere.userData.glow = THREE.MathUtils.lerp(sphere.userData.glow, targetGlow, 0.1);
 
-                // Dynamically breathe and glow the character plane itself
                 const plane = characterPlanes[index].mesh;
                 if (plane) {
                     plane.scale.setScalar(1.0 + (sphere.userData.glow * 0.25)); 
-                    // Dynamic color shift to brilliant gold when active
                     plane.material.color.setRGB(
                         1.0, 
                         0.84 + sphere.userData.glow * 0.16, 
@@ -905,7 +893,6 @@ Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in e
 
                 ripple.mesh.scale.setScalar(ripple.radius);
 
-                // Smoother and tighter fade transitions for a seamless wave train
                 const lifeRatio = (ripple.radius - minRippleRadius) / (maxRippleRadius - minRippleRadius);
                 let opacity = 0.0;
                 
