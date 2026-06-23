@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotus Bodhicitta System</title>
+    <title>Cultivation Depth of Syllable VA</title>
     <style>
         body {
             margin: 0;
@@ -31,7 +31,7 @@
             border-radius: 14px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            width: 280px;
+            width: 290px;
             pointer-events: auto;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -45,7 +45,7 @@
             cursor: pointer;
         }
         h1 {
-            font-size: 15px;
+            font-size: 13px;
             margin: 0;
             color: #ffd700;
             text-transform: uppercase;
@@ -249,7 +249,7 @@
     <!-- Loading Screen -->
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <div id="loading-text">Calibrating Lotus Bodhicitta System...</div>
+        <div id="loading-text">Calibrating Syllable VA Matrix...</div>
     </div>
 
     <div id="canvas-container"></div>
@@ -257,11 +257,11 @@
     <!-- Collapsible UI Control Panel (Defaults to Collapsed) -->
     <div id="ui-container" class="collapsed">
         <div id="ui-header">
-            <h1>Lotus Bodhicitta</h1>
+            <h1>Syllable VA Cultivation</h1>
             <button id="ui-toggle-btn">▼</button>
         </div>
         <div id="ui-content">
-            <p>Interactive meditation matrix displaying the Buddha's core, the single Siddham VA sphere, and dense golden ripples.</p>
+            <p>Meditative matrix displaying the 5 derivative stages of the Syllable VA with continuous golden ripples radiating from the core.</p>
             
             <div class="control-group">
                 <label>Character Render Mode</label>
@@ -286,13 +286,13 @@
     <!-- Popup Info Card for Click Interactivity -->
     <div id="popup-card">
         <button id="popup-close">&times;</button>
-        <div id="popup-title">Sphere Details</div>
+        <div id="popup-title">Syllable Details</div>
         <div class="popup-row">
             <span class="popup-label">Location:</span>
             <span class="popup-val" id="popup-name">-</span>
         </div>
         <div class="popup-row">
-            <span class="popup-label">Chakra Center:</span>
+            <span class="popup-label">Cultivation Stage:</span>
             <span class="popup-val" id="popup-chakra">-</span>
         </div>
         <div class="popup-row">
@@ -305,25 +305,66 @@
         </div>
         <!-- Mantra Section -->
         <div class="popup-mantra-section">
-            <div class="popup-label" style="margin-bottom: 6px; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">Sacred Mantra:</div>
+            <div class="popup-label" style="margin-bottom: 6px; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">Sacred Visualization:</div>
             <div class="popup-mantra-val" id="popup-mantra">-</div>
         </div>
     </div>
 
     <script>
         // --- 1. Coordinate, Asset & Mantra Data Mapping ---
-        // Shifted to (0, 0.1, 0) -> mapped to excelPos [X, Z, Y] -> [0.0, 0.0, 0.1]
+        // 5 Syllables mapped to their respective 3D coordinates around the Buddha's heart center (0, 0.1, 0)
         const sphereData = [
             { 
-                name: "Siddham VA Core", 
-                excelPos: [0.0, 0.0, 0.1], 
-                chakra: "Heart Chakra / All-Encompassing", 
-                image: "VA_Gold.png", 
+                name: "VA (Center Core)", 
+                excelPos: [0.0, 0.0, 0.1], // Mapped to (0.0, 0.1, 0.0)
+                chakra: "1. Ever-present Compassion", 
+                image: "06_VAvm2_Gold.png", // Replaced 01_VA_Gold.png
                 char: "𑖪", 
                 phonetic: "Va",
-                mantra: `Om Wa Dz La 
-Bo La Wa Li Ning 
-So Po He.`
+                mantra: `VA: ever-present compassion.
+"I am Compassion."
+The syllable VA is always there, compassion is ever-present, whether clearly visualized or not.`
+            },
+            { 
+                name: "VÀ (Right Wing)", 
+                excelPos: [1.0, 0.0, 0.1], // Mapped to (1.0, 0.1, 0.0)
+                chakra: "2. Transcending Worldliness", 
+                image: "02_VÀ_Gold.png", 
+                char: "𑖪𑖯", 
+                phonetic: "Và",
+                mantra: `VÀ: the practice of compassion.
+Inhale to VA and emanate energy, turning consciousness into loving energy radiating everywhere.`
+            },
+            { 
+                name: "VU (Bottom Wing)", 
+                excelPos: [0.0, 0.0, -0.9], // Mapped to (0.0, -0.9, 0.0)
+                chakra: "3. Engaging with the World", 
+                image: "03_VU_Gold.png", 
+                char: "𑖪𑖲", 
+                phonetic: "Vu",
+                mantra: `VU: the practice of vows, expansion & transformation.
+Direct your mind to open the hearts of all beings, engaging in the world to support and care for others.`
+            },
+            { 
+                name: "VAM (Left Wing)", 
+                excelPos: [-1.0, 0.0, 0.1], // Mapped to (-1.0, 0.1, 0.0)
+                chakra: "4. Realizing Emptiness", 
+                image: "04_VAM_Gold.png", 
+                char: "𑖪𑖽", 
+                phonetic: "Vam",
+                mantra: `VAM: the practice of being empty.
+"Let me become the wave."
+Become pure consciousness, realizing that compassion and emptiness are just one.`
+            },
+            { 
+                name: "VAH (Top Wing)", 
+                excelPos: [0.0, 0.0, 1.1], // Mapped to (0.0, 1.1, 0.0)
+                chakra: "5. Residing in Everyone's Heart", 
+                image: "05_VAH_Gold.png", 
+                char: "𑖪𑖾", 
+                phonetic: "Vah",
+                mantra: `VAH: the practice of consummation.
+Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in every living being's heart.`
             }
         ];
 
@@ -333,7 +374,7 @@ So Po He.`
         scene.fog = new THREE.FogExp2(0x05070a, 0.05);
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        // Default view angle rotated 190 degrees around Y-axis: (0, 0.8, 2.0) -> (-0.347, 0.8, -1.97)
+        // Default view angle rotated 190 degrees around Y-axis: (-0.347, 0.8, -1.97)
         camera.position.set(-0.347, 0.8, -1.97);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
@@ -396,6 +437,33 @@ So Po He.`
         const coreLight = new THREE.PointLight(0x00aaff, 2.0, 5); 
         coreLight.position.set(0, 0, 0);
         scene.add(coreLight);
+
+        // --- 4b. Add X, Y, Z Coordinate Helper Lines with Custom Floating Tip Labels ---
+        const axesHelper = new THREE.AxesHelper(3.0);
+        // Custom colors matching high-end technical guidelines
+        axesHelper.setColors(new THREE.Color(0xff3333), new THREE.Color(0x33ff33), new THREE.Color(0x3333ff));
+        scene.add(axesHelper);
+
+        function createAxisLabel(text, pos, color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = color;
+            ctx.font = 'bold 80px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, 64, 64);
+            const tex = new THREE.CanvasTexture(canvas);
+            const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+            const sprite = new THREE.Sprite(mat);
+            sprite.position.copy(pos);
+            sprite.scale.set(0.35, 0.35, 0.35);
+            scene.add(sprite);
+        }
+        createAxisLabel('X', new THREE.Vector3(3.2, 0, 0), '#ff3333');
+        createAxisLabel('Y', new THREE.Vector3(0, 3.2, 0), '#33ff33');
+        createAxisLabel('Z', new THREE.Vector3(0, 0, 3.2), '#3333ff');
 
         // --- 5. Materials Setup ---
         const privacyBlueGlass = new THREE.MeshPhysicalMaterial({
@@ -472,7 +540,7 @@ So Po He.`
             function (xhr) {
                 if (xhr.total > 0) {
                     const percent = Math.round((xhr.loaded / xhr.total) * 100);
-                    loadingText.innerText = `Calibrating Bodhicitta Matrix (${percent}%)`;
+                    loadingText.innerText = `Calibrating Syllable VA Matrix (${percent}%)`;
                 }
             },
             function(err) {
@@ -505,7 +573,7 @@ So Po He.`
             }
         );
 
-        // --- 8. Creating the Single VA Sphere and Siddham Character ---
+        // --- 8. Creating the 5 Syllable Spheres and Siddham Characters ---
         const spheresGroup = new THREE.Group();
         scene.add(spheresGroup);
 
@@ -513,7 +581,7 @@ So Po He.`
         const clickableSpheres = []; 
         const textureLoader = new THREE.TextureLoader();
 
-        // Generates fallback texture containing ONLY the centered, maximized character image (No text string "VA")
+        // Generates fallback texture containing ONLY the centered, maximized character image (No phonetic text)
         function createFallbackGlyphTexture(char) {
             const canvas = document.createElement('canvas');
             canvas.width = 512;
@@ -590,12 +658,12 @@ So Po He.`
             });
         });
 
-        // --- 8b. Dense Golden Spherical Ripple Wave Effect ---
+        // --- 8b. Highly Dense Golden Spherical Ripple Wave Effect (At least 6 displaying at anytime) ---
         const ripples = [];
-        const numRipples = 10; 
-        const minRippleRadius = 0.19; // Starts at VA sphere surface
+        const numRipples = 15; // Increased to 15 to ensure high density and continuous wave-trains
+        const minRippleRadius = 0.19; // Starts at central VA sphere surface
         const maxRippleRadius = 4.5;  // Spreads far beyond outer bubble (radius 2.1)
-        const rippleSpeed = 1.2;      // Expansion speed
+        const rippleSpeed = 1.2;      // Speed of expansion
 
         for (let i = 0; i < numRipples; i++) {
             const rippleGeo = new THREE.SphereGeometry(1, 32, 32);
@@ -628,12 +696,13 @@ So Po He.`
             });
 
             const rippleMesh = new THREE.Mesh(rippleGeo, rippleMat);
-            // Anchor at shifted VA sphere location (0.0, 0.1, 0.0)
+            // Anchor at shifted central VA sphere location (0.0, 0.1, 0.0)
             rippleMesh.position.set(0.0, 0.1, 0.0); 
             scene.add(rippleMesh);
 
             ripples.push({
                 mesh: rippleMesh,
+                // Evenly stagger starting radii across the spectrum to keep at least 6-8 distinct visible rings
                 radius: minRippleRadius + (i * (maxRippleRadius - minRippleRadius) / numRipples),
                 material: rippleMat
             });
@@ -742,7 +811,67 @@ So Po He.`
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // --- 13. Animation Loop ---
+        // --- 13. Sequential Lighting Matrix Configuration ---
+        // Cycle coordinates matching the active positions of the 5 Shingon syllables
+        const sequenceCoordinates = [
+            [0.0, 0.0, 0.1],   // 1. VA (Center)
+            [1.0, 0.0, 0.1],   // 2. VÀ (Right)
+            [0.0, 0.0, -0.9],  // 3. VU (Bottom)
+            [-1.0, 0.0, 0.1],  // 4. VAM (Left)
+            [0.0, 0.0, 1.1]    // 5. VAH (Top)
+        ];
+
+        let currentSeqIndex = 0;
+        let seqTimer = 0;
+        const seqStepDuration = 1.5;    
+        const seqPauseDuration = 2.0;   
+        let isSeqPaused = false;
+
+        function updateSequentialLighting(delta) {
+            seqTimer += delta;
+            const currentDuration = isSeqPaused ? seqPauseDuration : seqStepDuration;
+
+            if (seqTimer >= currentDuration) {
+                seqTimer = 0;
+                if (isSeqPaused) {
+                    isSeqPaused = false;
+                    currentSeqIndex = 0; 
+                } else {
+                    currentSeqIndex++;
+                    if (currentSeqIndex >= sequenceCoordinates.length) {
+                        isSeqPaused = true;
+                        currentSeqIndex = -1; 
+                    }
+                }
+            }
+
+            const activeCoords = (currentSeqIndex !== -1) ? sequenceCoordinates[currentSeqIndex] : null;
+
+            clickableSpheres.forEach((sphere, index) => {
+                const data = sphere.userData;
+                const isTarget = activeCoords && 
+                                 Math.abs(data.excelPos[0] - activeCoords[0]) < 0.01 &&
+                                 Math.abs(data.excelPos[1] - activeCoords[1]) < 0.01 &&
+                                 Math.abs(data.excelPos[2] - activeCoords[2]) < 0.01;
+
+                const targetGlow = isTarget ? 1.0 : 0.0;
+                sphere.userData.glow = THREE.MathUtils.lerp(sphere.userData.glow, targetGlow, 0.1);
+
+                // Dynamically breathe and glow the character plane itself
+                const plane = characterPlanes[index].mesh;
+                if (plane) {
+                    plane.scale.setScalar(1.0 + (sphere.userData.glow * 0.25)); 
+                    // Dynamic color shift to brilliant gold when active
+                    plane.material.color.setRGB(
+                        1.0, 
+                        0.84 + sphere.userData.glow * 0.16, 
+                        0.0 + sphere.userData.glow * 0.3
+                    );
+                }
+            });
+        }
+
+        // --- 14. Animation Loop ---
         const clock = new THREE.Clock();
 
         function animate() {
@@ -763,29 +892,10 @@ So Po He.`
             const glowVal = parseFloat(glowIntensityInput.value);
             coreLight.intensity = (Math.sin(elapsedTime * 2) * 0.3 + 1.0) * glowVal;
 
-            // --- 13a. Animate Single VA Sphere Character Glow ---
-            const mainSphere = clickableSpheres[0];
-            if (mainSphere) {
-                const breathing = Math.sin(elapsedTime * 2.0) * 0.5 + 0.5; 
-                mainSphere.userData.glow = THREE.MathUtils.lerp(mainSphere.userData.glow, breathing, 0.1);
-                
-                // Keep hit-box scaled with breathing
-                mainSphere.scale.setScalar(1.0 + (mainSphere.userData.glow * 0.2));
-                
-                // Dynamically breathe and glow the character plane itself
-                const mainPlane = characterPlanes[0].mesh;
-                if (mainPlane) {
-                    mainPlane.scale.setScalar(1.0 + (mainSphere.userData.glow * 0.15));
-                    // Modulate color brightness based on breathing cycle
-                    mainPlane.material.color.setRGB(
-                        1.0, 
-                        0.84 + mainSphere.userData.glow * 0.16, 
-                        0.0 + mainSphere.userData.glow * 0.3
-                    );
-                }
-            }
+            // Run sequential lighting animation loop
+            updateSequentialLighting(delta);
 
-            // --- 13b. Animate Golden Ripple Waves ---
+            // --- 14b. Animate Golden Ripple Waves ---
             ripples.forEach((ripple) => {
                 ripple.radius += rippleSpeed * delta;
                 
