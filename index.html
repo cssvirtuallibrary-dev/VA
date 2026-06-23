@@ -409,6 +409,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.2;
+        renderer.outputEncoding = THREE.sRGBEncoding; // Set sRGB output encoding for vibrant colors
         container.appendChild(renderer.domElement);
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -463,9 +464,9 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
         coreLight.position.set(0, 0, 0);
         scene.add(coreLight);
 
-        // --- 4b. Add X, Y, Z Coordinate Helper Lines ---
+        // --- 4b. Add X, Y, Z Coordinate Helper Lines (WebGL r128 Compatible) ---
         const axesHelper = new THREE.AxesHelper(3.0);
-        axesHelper.setColors(new THREE.Color(0xff3333), new THREE.Color(0x33ff33), new THREE.Color(0x3333ff));
+        // Note: setColors() is removed to prevent crashes in r128. Default Red (+X), Green (+Y), Blue (+Z) are used.
         scene.add(axesHelper);
 
         function createAxisLabel(text, pos, color) {
@@ -555,7 +556,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
                 buddhaMesh.position.set(0.0, -0.5, -0.18); 
                 buddhaMesh.rotation.y = Math.PI / 2; 
                 
-                buddhaGroup.add(buddhaMesh); // FIXED: Successfully and correctly referenced buddhaGroup
+                buddhaGroup.add(buddhaMesh); 
                 
                 loadingOverlay.style.opacity = 0;
                 setTimeout(() => { loadingOverlay.style.display = 'none'; }, 600);
@@ -621,7 +622,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             ctx.fillText(char, 256, 256); 
 
             const tex = new THREE.CanvasTexture(canvas);
-            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.encoding = THREE.sRGBEncoding; // Compatibility fix for r128
             return tex;
         }
 
@@ -662,7 +663,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             textureLoader.load(
                 data.image,
                 (loadedTex) => {
-                    loadedTex.colorSpace = THREE.SRGBColorSpace;
+                    loadedTex.encoding = THREE.sRGBEncoding; // Compatibility fix for r128
                     charMaterial.map = loadedTex;
                     charMaterial.needsUpdate = true;
                 },
@@ -679,9 +680,9 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             });
         });
 
-        // --- 8b. Highly Dense Golden Spherical Ripple Wave Effect (At least 6 displaying concurrently) ---
+        // --- 8b. Highly Dense Golden Spherical Ripple Wave Effect ---
         const ripples = [];
-        const numRipples = 18; // Staggered count to ensure dense wave train
+        const numRipples = 18; 
         const minRippleRadius = 0.19; 
         const maxRippleRadius = 4.5;  
         const rippleSpeed = 1.2;      
@@ -807,7 +808,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
 
             raycaster.setFromCamera(mouse, camera);
 
-            // Filter raycasting targets so users click on the active center core sibling (VA vs VAvm2)
+            // Filter active clickable siblings at the center core (VA vs VAvm2) depending on active step
             const activeClickable = clickableSpheres.filter(sphere => {
                 if (sphere.userData.id === 'va' && currentSeqIndex === 5) return false;
                 if (sphere.userData.id === 'vavm2' && currentSeqIndex !== 5) return false;
@@ -840,12 +841,12 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
 
         // --- 13. Sequential Lighting 6-Syllable Matrix Configuration ---
         const sequenceStages = [
-            { id: "va" },      // 1. VA (Center Core)
-            { id: "va_right" },  // 2. VÀ (Right Wing)
-            { id: "vu_bottom" }, // 3. VU (Bottom Wing)
-            { id: "vam_left" },  // 4. VAM (Left Wing)
-            { id: "vah_top" },   // 5. VAH (Top Wing)
-            { id: "vavm2" }      // 6. VAvm2 (Upgraded Center Core)
+            { id: "va" },        
+            { id: "va_right" },  
+            { id: "vu_bottom" }, 
+            { id: "vam_left" },  
+            { id: "vah_top" },   
+            { id: "vavm2" }      
         ];
 
         let currentSeqIndex = 0;
@@ -883,16 +884,13 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
 
                 const plane = characterPlanes[index].mesh;
                 if (plane) {
-                    // Smoothly adjust scale based on active state
                     plane.scale.setScalar(1.0 + (sphere.userData.glow * 0.25)); 
 
                     // Opacity blending to prevent overlapping artifacts for VA / VAvm2 at Center
                     if (data.id === 'va') {
-                        // Completely hide VA when VAvm2 is active
                         const targetOpacity = (currentSeqIndex === 5) ? 0.0 : (isTarget ? 1.0 : 0.3);
                         plane.material.opacity = THREE.MathUtils.lerp(plane.material.opacity, targetOpacity, 0.1);
                     } else if (data.id === 'vavm2') {
-                        // Completely hide VAvm2 when VA is active
                         const targetOpacity = (currentSeqIndex === 5) ? 1.0 : 0.0;
                         plane.material.opacity = THREE.MathUtils.lerp(plane.material.opacity, targetOpacity, 0.1);
                     } else {
@@ -900,7 +898,6 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
                         plane.material.opacity = THREE.MathUtils.lerp(plane.material.opacity, targetOpacity, 0.1);
                     }
 
-                    // Shift color to bright gold when active
                     plane.material.color.setRGB(
                         1.0, 
                         0.84 + sphere.userData.glow * 0.16, 
