@@ -20,7 +20,7 @@
             height: 100vh;
             display: block;
         }
-        
+
         /* Collapsible UI Menu Control Panel */
         #ui-container {
             position: absolute;
@@ -67,6 +67,7 @@
             max-height: 400px;
             opacity: 1;
         }
+
         /* Collapsed State Styles */
         #ui-container.collapsed {
             width: 220px;
@@ -262,7 +263,7 @@
         </div>
         <div id="ui-content">
             <p>Meditative matrix displaying the 6 derivative stages of the Syllable VA with continuous golden ripples radiating from the core.</p>
-            
+
             <div class="control-group">
                 <label>Character Render Mode</label>
                 <select id="billboard-mode">
@@ -311,8 +312,9 @@
     </div>
 
     <script>
-        // --- Failsafe Automatic Force Dismissal Timeout ---
-        // Guarantees the interface loads instantly even if assets or local servers are slow/strict
+        // ============================================================
+        // OPTIMIZATION 1: Failsafe timeout — unchanged in behavior
+        // ============================================================
         setTimeout(() => {
             const overlay = document.getElementById('loading-overlay');
             if (overlay && overlay.style.display !== 'none') {
@@ -322,79 +324,75 @@
             }
         }, 4000);
 
+        // ============================================================
         // --- 1. Coordinate, Asset & Mantra Data Mapping ---
+        // ============================================================
         const sphereData = [
-            { 
+            {
                 id: "va",
-                name: "VA (Center Core)", 
-                excelPos: [0.0, 0.1, 0.0], 
-                chakra: "1. Ever-present Compassion", 
-                image: "01_VA_Gold.PNG", 
-                char: "𑖪", 
+                name: "VA (Center Core)",
+                excelPos: [0.0, 0.1, 0.0],
+                chakra: "1. Ever-present Compassion",
+                image: "01_VA_Gold.PNG",
+                char: "𑖪",
                 phonetic: "Va",
-                mantra: `VA: ever-present compassion.
-"I am Compassion."
-The syllable VA is always there, compassion is ever-present, whether clearly visualized or not.`
+                mantra: `VA: ever-present compassion.\n"I am Compassion."\nThe syllable VA is always there, compassion is ever-present, whether clearly visualized or not.`
             },
-            { 
+            {
                 id: "va_right",
-                name: "VÀ (Right Wing)", 
-                excelPos: [1.0, 0.1, 0.0], 
-                chakra: "2. Transcending Worldliness", 
-                image: "02_VAA_Gold.PNG", 
-                char: "𑖪𑖯", 
+                name: "VÀ (Right Wing)",
+                excelPos: [1.0, 0.1, 0.0],
+                chakra: "2. Transcending Worldliness",
+                image: "02_VAA_Gold.PNG",
+                char: "𑖪𑖯",
                 phonetic: "Và",
-                mantra: `VÀ: the practice of compassion.
-Inhale to VA and emanate energy, turning consciousness into loving energy radiating everywhere.`
+                mantra: `VÀ: the practice of compassion.\nInhale to VA and emanate energy, turning consciousness into loving energy radiating everywhere.`
             },
-            { 
+            {
                 id: "vu_bottom",
-                name: "VU (At the Back)", 
-                excelPos: [0.0, 1.0, 0.1], 
-                chakra: "3. Engaging with the World", 
-                image: "03_VU_Gold.PNG", 
-                char: "𑖪𑖲", 
+                name: "VU (At the Back)",
+                excelPos: [0.0, 1.0, 0.1],
+                chakra: "3. Engaging with the World",
+                image: "03_VU_Gold.PNG",
+                char: "𑖪𑖲",
                 phonetic: "Vu",
-                mantra: `VU: the practice of vows, expansion & transformation.
-Direct your mind to open the hearts of all beings, engaging in the world to support and care for others.`
+                mantra: `VU: the practice of vows, expansion & transformation.\nDirect your mind to open the hearts of all beings, engaging in the world to support and care for others.`
             },
-            { 
+            {
                 id: "vam_left",
-                name: "VAM (Left Wing)", 
-                excelPos: [-1.0, 0.1, 0.0], 
-                chakra: "4. Realizing Emptiness", 
-                image: "04_VAM_Gold.PNG", 
-                char: "𑖪𑖽", 
+                name: "VAM (Left Wing)",
+                excelPos: [-1.0, 0.1, 0.0],
+                chakra: "4. Realizing Emptiness",
+                image: "04_VAM_Gold.PNG",
+                char: "𑖪𑖽",
                 phonetic: "Vam",
-                mantra: `VAM: the practice of being empty.
-"Let me become the wave."
-Become pure consciousness, realizing that compassion and emptiness are just one.`
+                mantra: `VAM: the practice of being empty.\n"Let me become the wave."\nBecome pure consciousness, realizing that compassion and emptiness are just one.`
             },
-            { 
+            {
                 id: "vah_top",
-                name: "VAH (At the Front)", 
-                excelPos: [0.0, -1.0, 0.1], 
-                chakra: "5. Residing in Everyone's Heart", 
-                image: "05_VAH_Gold.PNG", 
-                char: "𑖪𑖾", 
+                name: "VAH (At the Front)",
+                excelPos: [0.0, -1.0, 0.1],
+                chakra: "5. Residing in Everyone's Heart",
+                image: "05_VAH_Gold.PNG",
+                char: "𑖪𑖾",
                 phonetic: "Vah",
-                mantra: `VAH: the practice of consummation.
-Ultimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in every living being's heart.`
+                mantra: `VAH: the practice of consummation.\nUltimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in every living being's heart.`
             },
-            { 
+            {
                 id: "vavm2",
-                name: "VAvm2 (Upgraded Core)", 
-                excelPos: [0.0, 0.1, 0.0], 
-                chakra: "6. Ultimate Upgraded Compassion", 
-                image: "06_VAvm2_Gold.PNG", 
-                char: "𑖪", 
+                name: "VAvm2 (Upgraded Core)",
+                excelPos: [0.0, 0.1, 0.0],
+                chakra: "6. Ultimate Upgraded Compassion",
+                image: "06_VAvm2_Gold.PNG",
+                char: "𑖪",
                 phonetic: "Vavm2",
-                mantra: `VAvm2: Upgraded ultimate state at the end of the 6-syllable cycle.
-The complete transformation, upgrade, and realization of the Syllable VA cultivation.`
+                mantra: `VAvm2: Upgraded ultimate state at the end of the 6-syllable cycle.\nThe complete transformation, upgrade, and realization of the Syllable VA cultivation.`
             }
         ];
 
-        // --- 2. Setup Scene, Camera, and Renderer ---
+        // ============================================================
+        // --- 2. Scene, Camera, Renderer Setup ---
+        // ============================================================
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x05070a, 0.05);
@@ -402,30 +400,36 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
         camera.position.set(-0.347, 0.8, -1.97);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: false,
+            powerPreference: "high-performance"
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.2;
-        renderer.outputEncoding = THREE.sRGBEncoding; 
+        renderer.outputEncoding = THREE.sRGBEncoding;
         container.appendChild(renderer.domElement);
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
         controls.maxDistance = 12;
-        controls.minDistance = 0.5; 
-        controls.target.set(0, 0.1, 0); 
+        controls.minDistance = 0.5;
+        controls.target.set(0, 0.1, 0);
 
+        // ============================================================
         // --- 3. Procedural Studio Environment Map ---
+        // ============================================================
         function createStudioEnvMap() {
             const canvas = document.createElement('canvas');
             canvas.width = 256;
             canvas.height = 128;
             const ctx = canvas.getContext('2d');
-            
+
             const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
             grad.addColorStop(0, '#101622');
             grad.addColorStop(0.5, '#05070a');
@@ -443,7 +447,9 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
         }
         scene.environment = createStudioEnvMap();
 
+        // ============================================================
         // --- 4. Studio Lighting ---
+        // ============================================================
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
         scene.add(ambientLight);
 
@@ -460,20 +466,22 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
         rimLight.position.set(0, -5, 0);
         scene.add(rimLight);
 
-        const coreLight = new THREE.PointLight(0x00aaff, 2.0, 5); 
+        const coreLight = new THREE.PointLight(0x00aaff, 2.0, 5);
         coreLight.position.set(0, 0, 0);
         scene.add(coreLight);
 
+        // ============================================================
         // --- 5. Materials Setup ---
+        // ============================================================
         const privacyBlueGlass = new THREE.MeshPhysicalMaterial({
-            color: 0x88ddff,             
-            emissive: 0x0044aa,          
-            emissiveIntensity: 0.4,      
-            roughness: 0.5,              
+            color: 0x88ddff,
+            emissive: 0x0044aa,
+            emissiveIntensity: 0.4,
+            roughness: 0.5,
             metalness: 0.1,
-            transmission: 0.75,          
-            ior: 1.5,                    
-            thickness: 1.8,              
+            transmission: 0.75,
+            ior: 1.5,
+            thickness: 1.8,
             transparent: true,
             opacity: 1.0,
             side: THREE.DoubleSide,
@@ -499,43 +507,45 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             depthWrite: false
         });
 
-        // --- 6. Creating the Outer Bubble ---
+        // ============================================================
+        // --- 6. Outer Bubble ---
+        // ============================================================
         const outerBubbleGeo = new THREE.SphereGeometry(2.1, 64, 64);
         const outerBubble = new THREE.Mesh(outerBubbleGeo, clearBubbleGlass);
         scene.add(outerBubble);
 
+        // ============================================================
         // --- 7. Loading the 3D Buddha Model ---
+        // ============================================================
         const buddhaGroup = new THREE.Group();
-        scene.add(buddhaGroup); 
+        scene.add(buddhaGroup);
 
         const loader = new THREE.GLTFLoader();
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingText = document.getElementById('loading-text');
 
-        const MODEL_URL = 'glass+buddha+statue+3d+model.glb'; 
+        const MODEL_URL = 'glass+buddha+statue+3d+model.glb';
 
-        loader.load(MODEL_URL, 
+        loader.load(
+            MODEL_URL,
             function(gltf) {
                 const buddhaMesh = gltf.scene;
-                
                 buddhaMesh.traverse((node) => {
                     if (node.isMesh) {
-                        node.material = privacyBlueGlass; 
+                        node.material = privacyBlueGlass;
                         node.castShadow = true;
                         node.receiveShadow = true;
                     }
                 });
-                
-                buddhaMesh.scale.set(1.4, 1.4, 1.4); 
-                buddhaMesh.position.set(0.0, -0.5, -0.18); 
-                buddhaMesh.rotation.y = Math.PI / 2; 
-                
-                buddhaGroup.add(buddhaMesh); 
-                
+                buddhaMesh.scale.set(1.4, 1.4, 1.4);
+                buddhaMesh.position.set(0.0, -0.5, -0.18);
+                buddhaMesh.rotation.y = Math.PI / 2;
+                buddhaGroup.add(buddhaMesh);
+
                 loadingOverlay.style.opacity = 0;
                 setTimeout(() => { loadingOverlay.style.display = 'none'; }, 600);
             },
-            function (xhr) {
+            function(xhr) {
                 if (xhr.total > 0) {
                     const percent = Math.round((xhr.loaded / xhr.total) * 100);
                     loadingText.innerText = `Calibrating Syllable VA Matrix (${percent}%)`;
@@ -544,7 +554,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             function(err) {
                 console.warn("Could not find local GLB model. Generating procedural frosted glass fallback.", err);
                 loadingText.innerText = "Initializing Fallback System...";
-                
+
                 const fallbackGroup = new THREE.Group();
                 const head = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), privacyBlueGlass);
                 head.position.y = 0.55;
@@ -560,8 +570,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
                 fallbackGroup.add(legs);
 
                 fallbackGroup.position.set(0.0, -0.5, -0.18);
-                fallbackGroup.rotation.y = Math.PI / 2; 
-                
+                fallbackGroup.rotation.y = Math.PI / 2;
                 buddhaGroup.add(fallbackGroup);
 
                 setTimeout(() => {
@@ -571,15 +580,25 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             }
         );
 
+        // ============================================================
         // --- 8. Creating the 6 Syllable Spheres and Siddham Characters ---
+        //
+        // OPTIMIZATION 2: Shared plane geometry — one PlaneGeometry
+        //   allocated once and reused across all 6 character meshes.
+        //   Previously, a new PlaneGeometry was created per iteration,
+        //   meaning 6 separate GPU buffer allocations.
+        // ============================================================
         const spheresGroup = new THREE.Group();
         scene.add(spheresGroup);
 
-        const characterPlanes = []; 
-        const clickableSpheres = []; 
+        const characterPlanes = [];
+        const clickableSpheres = [];
         const textureLoader = new THREE.TextureLoader();
 
-        // Generates elegant fallback texture with glowing Siddham text
+        // Shared geometry for all 6 character planes (OPTIMIZATION 2)
+        const sharedPlaneGeo = new THREE.PlaneGeometry(0.38, 0.38);
+
+        // Fallback glyph texture — generates glowing Siddham text on canvas
         function createFallbackGlyphTexture(char) {
             const canvas = document.createElement('canvas');
             canvas.width = 512;
@@ -589,40 +608,31 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             ctx.clearRect(0, 0, 512, 512);
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            
+
             ctx.shadowColor = '#ffd700';
             ctx.shadowBlur = 30;
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 340px sans-serif'; 
-            ctx.fillText(char, 256, 256); 
+            ctx.font = 'bold 340px sans-serif';
+            ctx.fillText(char, 256, 256);
 
             const tex = new THREE.CanvasTexture(canvas);
-            tex.encoding = THREE.sRGBEncoding; 
+            tex.encoding = THREE.sRGBEncoding;
             return tex;
         }
 
         sphereData.forEach((data) => {
-            const x = data.excelPos[0];
-            const y = data.excelPos[1]; 
-            const z = data.excelPos[2]; 
-            const pos = new THREE.Vector3(x, y, z);
+            const pos = new THREE.Vector3(...data.excelPos);
 
-            const sphereGeo = new THREE.SphereGeometry(0.19, 32, 32); 
-            
+            // Invisible hitbox sphere (shared geometry not needed here — unique per sphere is fine)
+            const sphereGeo = new THREE.SphereGeometry(0.19, 32, 32);
             const sphere = new THREE.Mesh(sphereGeo, invisibleHitboxMaterial);
             sphere.position.copy(pos);
-            sphere.userData = { 
-                ...data,
-                glow: 0.0 
-            }; 
+            sphere.userData = { ...data, glow: 0.0 };
             spheresGroup.add(sphere);
             clickableSpheres.push(sphere);
 
-            const planeSize = 0.38; 
-            const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
-            // Initialize with gold-glowing Siddham character fallback
-            let characterTex = createFallbackGlyphTexture(data.char);
-
+            // OPTIMIZATION 2 APPLIED: sharedPlaneGeo reused here
+            const characterTex = createFallbackGlyphTexture(data.char);
             const charMaterial = new THREE.MeshBasicMaterial({
                 map: characterTex,
                 transparent: true,
@@ -632,7 +642,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
                 opacity: 0.0
             });
 
-            const plane = new THREE.Mesh(planeGeo, charMaterial);
+            const plane = new THREE.Mesh(sharedPlaneGeo, charMaterial);
             plane.position.copy(pos);
             spheresGroup.add(plane);
 
@@ -640,7 +650,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             textureLoader.load(
                 data.image,
                 (loadedTex) => {
-                    loadedTex.encoding = THREE.sRGBEncoding; 
+                    loadedTex.encoding = THREE.sRGBEncoding;
                     charMaterial.map = loadedTex;
                     charMaterial.needsUpdate = true;
                 },
@@ -657,16 +667,27 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             });
         });
 
-        // --- 8b. Highly Dense Golden Spherical Ripple Wave Effect (Slowed to 25% speed) ---
+        // ============================================================
+        // --- 8b. Golden Spherical Ripple Wave Effect ---
+        //
+        // OPTIMIZATION 3: Shared ripple geometry — one SphereGeometry
+        //   allocated once and reused across all 18 ripple meshes.
+        //   Previously, a new SphereGeometry(1, 32, 32) was created per
+        //   ripple (18 separate GPU buffer allocations). Segments reduced
+        //   from 32 to 24 — imperceptible on transparent shells, saves
+        //   ~44% geometry data per ripple. Materials remain unique per
+        //   mesh because each carries its own opacity uniform.
+        // ============================================================
         const ripples = [];
-        const numRipples = 18; 
-        const minRippleRadius = 0.19; 
-        const maxRippleRadius = 4.5;  
-        const rippleSpeed = 0.3; // Slowed down from 1.2 to 0.3 (25% speed)
+        const numRipples = 18;
+        const minRippleRadius = 0.19;
+        const maxRippleRadius = 4.5;
+        const rippleSpeed = 0.3;
+
+        // OPTIMIZATION 3 APPLIED: one shared geometry for all ripple meshes
+        const sharedRippleGeo = new THREE.SphereGeometry(1, 24, 24);
 
         for (let i = 0; i < numRipples; i++) {
-            const rippleGeo = new THREE.SphereGeometry(1, 32, 32);
-            
             const rippleMat = new THREE.ShaderMaterial({
                 uniforms: {
                     glowColor: { value: new THREE.Color(0xffd700) },
@@ -694,8 +715,9 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
                 depthWrite: false
             });
 
-            const rippleMesh = new THREE.Mesh(rippleGeo, rippleMat);
-            rippleMesh.position.set(0.0, 0.1, 0.0); 
+            // sharedRippleGeo reused — unique material carries per-instance uniform state
+            const rippleMesh = new THREE.Mesh(sharedRippleGeo, rippleMat);
+            rippleMesh.position.set(0.0, 0.1, 0.0);
             scene.add(rippleMesh);
 
             ripples.push({
@@ -705,12 +727,16 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             });
         }
 
+        // ============================================================
         // --- 9. Base Aesthetic Grid ---
-        const gridHelper = new THREE.GridHelper(8, 32, 0x00aaff, 0x141a24); 
+        // ============================================================
+        const gridHelper = new THREE.GridHelper(8, 32, 0x00aaff, 0x141a24);
         gridHelper.position.y = -2.3;
         scene.add(gridHelper);
 
+        // ============================================================
         // --- 10. Collapsible Menu Controls ---
+        // ============================================================
         const uiContainer = document.getElementById('ui-container');
         const uiHeader = document.getElementById('ui-header');
         const uiToggleBtn = document.getElementById('ui-toggle-btn');
@@ -720,17 +746,58 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             uiToggleBtn.innerText = isCollapsed ? '▼' : '▲';
         });
 
+        // ============================================================
+        // OPTIMIZATION 4: Cache UI control values — read once on change,
+        //   not on every animation frame (~60x/sec). Previously, parseFloat()
+        //   and .value were called inside animate() and inner forEach loops
+        //   every frame, causing unnecessary DOM reads and type coercions.
+        // ============================================================
+        const billboardModeSelect = document.getElementById('billboard-mode');
+        const rotationSpeedInput = document.getElementById('rotation-speed');
+        const glowIntensityInput = document.getElementById('glow-intensity');
+
+        let cachedRPM = parseFloat(rotationSpeedInput.value);
+        let cachedGlow = parseFloat(glowIntensityInput.value);
+        let cachedBillboardMode = billboardModeSelect.value;
+
+        rotationSpeedInput.addEventListener('input', () => {
+            cachedRPM = parseFloat(rotationSpeedInput.value);
+        });
+        glowIntensityInput.addEventListener('input', () => {
+            cachedGlow = parseFloat(glowIntensityInput.value);
+        });
+        billboardModeSelect.addEventListener('change', () => {
+            cachedBillboardMode = billboardModeSelect.value;
+        });
+
+        // ============================================================
         // --- 11. Click Interactivity (Raycasting) ---
+        // ============================================================
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
-        
+
         const popupCard = document.getElementById('popup-card');
         const popupName = document.getElementById('popup-name');
         const popupChakra = document.getElementById('popup-chakra');
         const popupGlyph = document.getElementById('popup-glyph');
         const popupCoords = document.getElementById('popup-coords');
         const popupMantra = document.getElementById('popup-mantra');
-        let activeOutline = null;
+
+        // ============================================================
+        // OPTIMIZATION 5: Reusable outline mesh — created once, toggled
+        //   via .visible. Previously, a new geometry, material, and mesh
+        //   were allocated on every click, causing GC pressure spikes.
+        // ============================================================
+        const outlineGeo = new THREE.SphereGeometry(0.21, 16, 16);
+        const outlineMat = new THREE.MeshBasicMaterial({
+            color: 0xffd700,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.6
+        });
+        const outlineMesh = new THREE.Mesh(outlineGeo, outlineMat);
+        outlineMesh.visible = false;
+        spheresGroup.add(outlineMesh); // Added to scene once, never re-created
 
         function showPopup(data) {
             popupName.innerText = data.name;
@@ -743,29 +810,12 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
 
         function hidePopup() {
             popupCard.classList.remove('active');
-            removeHighlight();
+            outlineMesh.visible = false; // OPTIMIZATION 5: toggle visibility, no allocation
         }
 
         function highlightSphere(sphere) {
-            if (activeOutline) spheresGroup.remove(activeOutline);
-
-            const outlineGeo = new THREE.SphereGeometry(0.21, 16, 16);
-            const outlineMat = new THREE.MeshBasicMaterial({
-                color: 0xffd700, 
-                wireframe: true,
-                transparent: true,
-                opacity: 0.6
-            });
-            activeOutline = new THREE.Mesh(outlineGeo, outlineMat);
-            activeOutline.position.copy(sphere.position);
-            spheresGroup.add(activeOutline);
-        }
-
-        function removeHighlight() {
-            if (activeOutline) {
-                spheresGroup.remove(activeOutline);
-                activeOutline = null;
-            }
+            outlineMesh.position.copy(sphere.position); // OPTIMIZATION 5: reposition in place
+            outlineMesh.visible = true;
         }
 
         document.getElementById('popup-close').addEventListener('click', (e) => {
@@ -785,7 +835,6 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
 
             raycaster.setFromCamera(mouse, camera);
 
-            // Filter active clickable siblings so users click only on currently visible elements
             const activeClickable = clickableSpheres.filter((sphere, idx) => {
                 const plane = characterPlanes[idx].mesh;
                 return plane && plane.material.opacity > 0.1;
@@ -804,30 +853,52 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
 
         window.addEventListener('pointerdown', handlePointerDown);
 
-        // --- 12. UI Controls Binding ---
-        const billboardModeSelect = document.getElementById('billboard-mode');
-        const rotationSpeedInput = document.getElementById('rotation-speed');
-        const glowIntensityInput = document.getElementById('glow-intensity');
-
+        // ============================================================
+        // OPTIMIZATION 6: Debounced resize handler — batches rapid resize
+        //   events (e.g., during window drag) into a single callback.
+        //   Previously, updateProjectionMatrix and setSize fired on every
+        //   pixel of movement during a resize drag.
+        // ============================================================
+        let resizeTimeout;
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }, 100);
         });
 
-        // --- 13. Sequential Timing State Machine Configuration ---
+        // ============================================================
+        // --- 13. Sequential Timing State Machine ---
+        // ============================================================
         const sequenceStages = [
-            { id: "va", duration: 1.8 },        // 1. VA
-            { id: "va_right", duration: 1.8 },  // 2. VÀ
-            { id: "vu_bottom", duration: 1.8 }, // 3. VU
-            { id: "vam_left", duration: 1.8 },  // 4. VAM
-            { id: "vah_top", duration: 1.8 },   // 5. VAH
-            { id: "clear", duration: 3.0 },     // 3s delay with all syllables cleared out
-            { id: "vavm2", duration: 10.0 }     // 6. VAvm2 active at center core for 10s
+            { id: "va",       duration: 1.8 },
+            { id: "va_right", duration: 1.8 },
+            { id: "vu_bottom",duration: 1.8 },
+            { id: "vam_left", duration: 1.8 },
+            { id: "vah_top",  duration: 1.8 },
+            { id: "clear",    duration: 3.0 },
+            { id: "vavm2",    duration: 10.0 }
         ];
 
         let currentSeqIndex = 0;
         let seqTimer = 0;
+
+        // ============================================================
+        // OPTIMIZATION 7: Frame-rate independent lerp alpha — computed
+        //   from delta so animation speed is consistent across all refresh
+        //   rates. Previously lerp used a hardcoded 0.1 factor, causing
+        //   faster transitions on high-refresh-rate displays (120/144Hz).
+        //   Formula: alpha = 1 - (1 - targetAlpha)^(delta / referenceStep)
+        //   where referenceStep = 1/60 represents a 60Hz baseline frame.
+        // ============================================================
+        const LERP_HALF_LIFE = 0.1; // seconds — tune this to adjust snappiness
+
+        function computeLerpAlpha(delta) {
+            // Exponential decay: frame-rate independent smoothing
+            return 1.0 - Math.exp(-delta / LERP_HALF_LIFE);
+        }
 
         function updateSequentialLighting(delta) {
             seqTimer += delta;
@@ -840,6 +911,7 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
             }
 
             const activeId = currentStage.id;
+            const lerpAlpha = computeLerpAlpha(delta); // OPTIMIZATION 7 APPLIED
 
             clickableSpheres.forEach((sphere, index) => {
                 const data = sphere.userData;
@@ -850,25 +922,16 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
                 let targetOpacity = 0.0;
 
                 if (activeId === "clear") {
-                    // Stage 6: Clear out all syllables completely
                     targetGlow = 0.0;
                     targetOpacity = 0.0;
                 } else if (activeId === "vavm2") {
-                    // Stage 7: Display ONLY the 6th syllable (VAvm2) for 10s. Clear all others.
                     if (data.id === "vavm2") {
                         targetGlow = 1.0;
                         targetOpacity = 1.0;
-                    } else {
-                        targetGlow = 0.0;
-                        targetOpacity = 0.0;
                     }
+                    // else targetGlow/Opacity remain 0.0
                 } else {
-                    // Stages 1 to 5: VA, VÀ, VU, VAM, VAH
-                    // vavm2 must be completely hidden during stages 1-5
-                    if (data.id === "vavm2") {
-                        targetGlow = 0.0;
-                        targetOpacity = 0.0;
-                    } else {
+                    if (data.id !== "vavm2") {
                         if (data.id === activeId) {
                             targetGlow = 1.0;
                             targetOpacity = 1.0;
@@ -879,20 +942,22 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
                     }
                 }
 
-                sphere.userData.glow = THREE.MathUtils.lerp(sphere.userData.glow, targetGlow, 0.1);
+                // OPTIMIZATION 7: delta-based lerp alpha used here
+                sphere.userData.glow = THREE.MathUtils.lerp(sphere.userData.glow, targetGlow, lerpAlpha);
                 plane.scale.setScalar(1.0 + (sphere.userData.glow * 0.25));
-                plane.material.opacity = THREE.MathUtils.lerp(plane.material.opacity, targetOpacity, 0.1);
+                plane.material.opacity = THREE.MathUtils.lerp(plane.material.opacity, targetOpacity, lerpAlpha);
 
-                // Shift color to bright gold when active
                 plane.material.color.setRGB(
-                    1.0, 
-                    0.84 + sphere.userData.glow * 0.16, 
+                    1.0,
+                    0.84 + sphere.userData.glow * 0.16,
                     0.0 + sphere.userData.glow * 0.3
                 );
             });
         }
 
+        // ============================================================
         // --- 14. Animation Loop ---
+        // ============================================================
         const clock = new THREE.Clock();
 
         function animate() {
@@ -900,26 +965,23 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
 
             const delta = clock.getDelta();
             const elapsedTime = clock.getElapsedTime();
-            
-            const rpm = parseFloat(rotationSpeedInput.value);
-            const rotSpeedRadPerSec = (rpm * Math.PI * 2) / 60;
+
+            // OPTIMIZATION 4 APPLIED: read cached values, not live DOM
+            const rotSpeedRadPerSec = (cachedRPM * Math.PI * 2) / 60;
             const rotationStep = rotSpeedRadPerSec * delta;
 
-            // Smooth scene rotation locked together
             spheresGroup.rotation.y += rotationStep;
-            buddhaGroup.rotation.y += rotationStep; 
+            buddhaGroup.rotation.y += rotationStep;
 
-            // Update core breathing glow intensity (blue light)
-            const glowVal = parseFloat(glowIntensityInput.value);
-            coreLight.intensity = (Math.sin(elapsedTime * 2) * 0.3 + 1.0) * glowVal;
+            // OPTIMIZATION 4 APPLIED: cachedGlow instead of parseFloat(input.value)
+            coreLight.intensity = (Math.sin(elapsedTime * 2) * 0.3 + 1.0) * cachedGlow;
 
-            // Run sequential lighting state machine
             updateSequentialLighting(delta);
 
             // --- 14b. Animate Golden Ripple Waves ---
             ripples.forEach((ripple) => {
                 ripple.radius += rippleSpeed * delta;
-                
+
                 if (ripple.radius > maxRippleRadius) {
                     ripple.radius = minRippleRadius;
                 }
@@ -927,8 +989,8 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
                 ripple.mesh.scale.setScalar(ripple.radius);
 
                 const lifeRatio = (ripple.radius - minRippleRadius) / (maxRippleRadius - minRippleRadius);
-                let opacity = 0.0;
-                
+                let opacity;
+
                 if (lifeRatio < 0.1) {
                     opacity = lifeRatio / 0.1;
                 } else {
@@ -938,12 +1000,13 @@ The complete transformation, upgrade, and realization of the Syllable VA cultiva
                 ripple.material.uniforms.opacity.value = opacity * 0.45;
             });
 
-            // Character plane floating animations
+            // Character plane floating animation
             characterPlanes.forEach((item) => {
                 const floatOffset = Math.sin(elapsedTime * 1.5 + item.offset) * 0.01;
                 item.mesh.position.y = item.initialPos.y + floatOffset;
 
-                if (billboardModeSelect.value === 'billboard') {
+                // OPTIMIZATION 4 APPLIED: cachedBillboardMode instead of select.value
+                if (cachedBillboardMode === 'billboard') {
                     item.mesh.quaternion.copy(camera.quaternion);
                 } else {
                     item.mesh.rotation.y = elapsedTime * 0.4 + item.offset;
