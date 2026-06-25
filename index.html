@@ -3,223 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cultivation Depth of Syllable VA</title>
+    <title>Lotus Bodhicitta System</title>
     <style>
-        *, *::before, *::after { box-sizing: border-box; }
-
         body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
+            margin: 0; padding: 0; overflow: hidden;
             background-color: #05070a;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            color: #fff;
-            user-select: none;
-            -webkit-user-select: none;
+            color: #fff; user-select: none; -webkit-user-select: none;
         }
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
 
-        #canvas-container {
-            width: 100vw;
-            height: 100vh;
-            display: block;
-        }
-
-        /* ── Control Panel ── */
+        /* Collapsible UI Control Panel */
         #ui-container {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(10, 15, 25, 0.8);
-            padding: 12px 16px;
-            border-radius: 14px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.08);
-            width: 290px;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            z-index: 10;
+            position: absolute; top: 15px; left: 15px;
+            background: rgba(10, 15, 25, 0.85); padding: 14px 18px; border-radius: 14px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.08);
+            width: 290px; pointer-events: auto;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); z-index: 10;
         }
-        #ui-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-        h1 {
-            font-size: 13px;
-            margin: 0;
-            color: #ffd700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-        #ui-toggle-btn {
-            background: none;
-            border: none;
-            color: #ffd700;
-            font-size: 12px;
-            cursor: pointer;
-            padding: 4px;
-            transition: transform 0.3s ease;
-        }
-        #ui-content {
-            margin-top: 12px;
-            transition: max-height 0.3s ease, opacity 0.3s ease;
-            max-height: 400px;
-            opacity: 1;
-            overflow: hidden;
-        }
+        #ui-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        h1 { font-size: 14px; margin: 0; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        #ui-toggle-btn { background: none; border: none; color: #ffd700; font-size: 12px; cursor: pointer; padding: 4px; transition: transform 0.3s ease; }
+        #ui-content { margin-top: 12px; transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 200px; opacity: 1; }
         #ui-container.collapsed { width: 220px; }
         #ui-container.collapsed #ui-toggle-btn { transform: rotate(-90deg); }
-        #ui-container.collapsed #ui-content {
-            max-height: 0;
-            opacity: 0;
-            margin-top: 0;
-            pointer-events: none;
-        }
+        #ui-container.collapsed #ui-content { max-height: 0; opacity: 0; margin-top: 0; overflow: hidden; pointer-events: none; }
 
-        /* ── Control Inputs ── */
-        p {
-            font-size: 11px;
-            color: #aaa;
-            margin: 0 0 12px 0;
-            line-height: 1.4;
-        }
+        p { font-size: 11px; color: #aaa; margin: 0 0 12px 0; line-height: 1.4; }
         .control-group { margin-bottom: 10px; }
-        label {
-            display: block;
-            font-size: 10px;
-            color: #888;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        label { display: block; font-size: 10px; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input[type="range"] {
+            width: 100%; background: #141a24; border: 1px solid #253043; color: #fff;
+            padding: 6px; border-radius: 6px; outline: none; box-sizing: border-box; font-size: 11px;
         }
-        select, input[type="range"] {
-            width: 100%;
-            background: #141a24;
-            border: 1px solid #253043;
-            color: #fff;
-            padding: 6px;
-            border-radius: 6px;
-            outline: none;
-            font-size: 11px;
-        }
+        details { background: rgba(20, 26, 36, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px 10px; margin-top: 8px; }
+        summary { font-size: 10px; color: #ffd700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; outline: none; user-select: none; }
 
-        /* ── Popup Card ── */
-        #popup-card {
-            position: absolute;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%) translateY(150px);
-            background: rgba(10, 15, 25, 0.92);
-            border: 1px solid rgba(255,215,0,0.25);
-            border-radius: 16px;
-            padding: 16px 20px;
-            width: 85%;
-            max-width: 340px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 20;
-        }
-        #popup-card.active {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-            pointer-events: auto;
-        }
-        #popup-close {
-            position: absolute;
-            top: 10px;
-            right: 12px;
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 4px;
-        }
-        #popup-title {
-            color: #ffd700;
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding-bottom: 6px;
-        }
-        .popup-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-            font-size: 12px;
-        }
-        .popup-label { color: #77849a; }
-        .popup-val { font-weight: 500; color: #fff; }
-        .popup-mantra-section {
-            margin-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.08);
-            padding-top: 10px;
-        }
-        .popup-mantra-val {
-            font-family: Georgia, Cambria, "Times New Roman", Times, serif;
-            font-style: italic;
-            font-size: 12.5px;
-            line-height: 1.55;
-            color: #ffd700;
-            background: rgba(255,215,0,0.04);
-            border-left: 2px solid #ffd700;
-            padding: 10px 14px;
-            border-radius: 0 8px 8px 0;
-            letter-spacing: 0.3px;
-            white-space: pre-line;
-        }
-
-        /* ── Loading Overlay ── */
         #loading-overlay {
-            position: absolute;
-            inset: 0;
-            background: #05070a;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            transition: opacity 0.6s ease;
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #05070a; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 100; transition: opacity 0.6s ease;
         }
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 2px solid rgba(255,215,0,0.1);
-            border-top-color: #ffd700;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+        .spinner { width: 40px; height: 40px; border: 2px solid rgba(255, 215, 0, 0.1); border-top-color: #ffd700; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        #loading-text {
-            margin-top: 16px;
-            color: #ffd700;
-            font-size: 12px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
+        #loading-text { margin-top: 16px; color: #ffd700; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; }
 
-        /* ── Mobile ── */
         @media (max-width: 600px) {
-            #ui-container,
-            #ui-container.collapsed {
-                width: calc(100% - 30px);
-                max-width: none;
-                top: 10px;
-                left: 10px;
-            }
+            #ui-container { width: calc(100% - 30px); max-width: none; top: 15px; left: 10px; }
+            #ui-container.collapsed { width: calc(100% - 30px); }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
@@ -227,660 +63,311 @@
 
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <div id="loading-text">Calibrating Syllable VA Matrix...</div>
+        <div id="loading-text">Calibrating Lotus Bodhicitta System...</div>
     </div>
 
     <div id="canvas-container"></div>
 
-    <div id="ui-container" class="collapsed">
+    <div id="ui-container">
         <div id="ui-header">
-            <h1>Syllable VA Cultivation</h1>
-            <button id="ui-toggle-btn">▼</button>
+            <h1>Lotus Bodhicitta</h1>
+            <button id="ui-toggle-btn">▲</button>
         </div>
         <div id="ui-content">
-            <p>Meditative matrix displaying the 6 derivative stages of the Syllable VA with continuous golden ripples radiating from the core.</p>
-            <div class="control-group">
-                <label>Character Render Mode</label>
-                <select id="billboard-mode">
-                    <option value="rotate" selected>Rotate in 3D Space</option>
-                    <option value="billboard">Face Camera (Billboard)</option>
-                </select>
-            </div>
+            <p>3D Buddha Bodhicitta meditation environment with axial coordinate system.</p>
+
             <div class="control-group">
                 <label>Auto-Rotation Speed (RPM)</label>
-                <input type="range" id="rotation-speed" min="0" max="5" step="0.1" value="0.5">
+                <input type="range" id="rotation-speed" min="0" max="10" step="0.1" value="0">
             </div>
-            <div class="control-group">
-                <label>Core Glow Intensity</label>
-                <input type="range" id="glow-intensity" min="0" max="3" step="0.1" value="1.5">
-            </div>
-        </div>
-    </div>
 
-    <div id="popup-card">
-        <button id="popup-close">&times;</button>
-        <div id="popup-title">Syllable Details</div>
-        <div class="popup-row">
-            <span class="popup-label">Location:</span>
-            <span class="popup-val" id="popup-name">-</span>
-        </div>
-        <div class="popup-row">
-            <span class="popup-label">Cultivation Stage:</span>
-            <span class="popup-val" id="popup-chakra">-</span>
-        </div>
-        <div class="popup-row">
-            <span class="popup-label">Siddham Glyph:</span>
-            <span class="popup-val" id="popup-glyph">-</span>
-        </div>
-        <div class="popup-row">
-            <span class="popup-label">Coordinates:</span>
-            <span class="popup-val" id="popup-coords">-</span>
-        </div>
-        <div class="popup-mantra-section">
-            <div class="popup-label" style="margin-bottom:6px;text-transform:uppercase;font-size:10px;letter-spacing:0.5px;">Sacred Visualization:</div>
-            <div class="popup-mantra-val" id="popup-mantra">-</div>
+            <details>
+                <summary>Core Glow Intensity</summary>
+                <div style="margin-top: 8px;">
+                    <input type="range" id="glow-intensity" min="0" max="3" step="0.1" value="1.5">
+                </div>
+            </details>
         </div>
     </div>
 
     <script>
-    'use strict';
+        // =========================================================================
+        // DATA — names, chakras & coordinates (preserved reference)
+        // Coordinate convention: excelPos = [X, Y-up, Z-depth]
+        // Render mapping: threeX = excelPos[0], threeY = excelPos[1], threeZ = excelPos[2]
+        // =========================================================================
+        const baseSphereData = [
+            // --- Series: Thường Trụ Bất Biến ---
+            { id: "B01", name: "Forehead",              excelPos: [0.0,  0.8, -0.1], chakra: "6 - Third Eye Chakra",      char: "𑖀",     phonetic: "A",     series: "Thường Trụ Bất Biến", dharma: "Cintamani Jewel" },
+            { id: "B02", name: "Sacral Chakra",         excelPos: [0.0, -0.2,  0.0], chakra: "2 - Sacral Chakra",         char: "𑖢",     phonetic: "Pa",    series: "Thường Trụ Bất Biến", dharma: "Jewel Bowl" },
+            { id: "B03", name: "Front Center",          excelPos: [0.0,  0.0, -0.1], chakra: "N/A",                       char: "𑖨",     phonetic: "Ra",    series: "Thường Trụ Bất Biến", dharma: "Lariat Rope" },
+            { id: "B04", name: "Behind Center",         excelPos: [0.0,  0.0,  0.1], chakra: "N/A",                       char: "𑖜",     phonetic: "Nna",   series: "Thường Trụ Bất Biến", dharma: "Jewel Beads" },
+            { id: "B05", name: "Above Right Knee",      excelPos: [0.5,  0.0, -0.5], chakra: "N/A",                       char: "𑖬",     phonetic: "Ssa",   series: "Thường Trụ Bất Biến", dharma: "Jewel Bow" },
+            { id: "B06", name: "Above Left Knee",       excelPos: [-0.5, 0.0, -0.5], chakra: "N/A",                       char: "𑖪",     phonetic: "Va",    series: "Thường Trụ Bất Biến", dharma: "Jewel Arrow" },
+            // --- Series: Liên Hoa Bồ Đề Tâm ---
+            { id: "B07", name: "Bottom Outer",          excelPos: [0.0, -2.0,  0.0], chakra: "N/A",                       char: "𑖚",     phonetic: "Dda",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
+            { id: "B08", name: "Bottom Inner",          excelPos: [0.0, -1.0,  0.0], chakra: "N/A",                       char: "𑖧",     phonetic: "Ya",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Treasure Chest" },
+            { id: "B09", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra",   char: "𑖓",     phonetic: "Ca",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
+            { id: "B10", name: "Top Inner",             excelPos: [0.0,  1.0,  0.0], chakra: "7 - Crown Chakra",          char: "𑖭",     phonetic: "Sa",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sweet Dews" },
+            { id: "B11", name: "Top Outer",             excelPos: [0.0,  2.0,  0.0], chakra: "N/A",                       char: "𑖤",     phonetic: "Ba",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
+            { id: "B12", name: "Back Outer",            excelPos: [0.0,  0.0,  2.0], chakra: "N/A",                       char: "𑖚",     phonetic: "Dda",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
+            { id: "B13", name: "Back Inner",            excelPos: [0.0,  0.0,  1.0], chakra: "N/A",                       char: "𑖎𑖿𑖬", phonetic: "Kssa",  series: "Liên Hoa Bồ Đề Tâm",  dharma: "Red Lotus" },
+            { id: "B14", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra",   char: "𑖓",     phonetic: "Ca",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
+            { id: "B15", name: "Front Inner",           excelPos: [0.0,  0.0, -1.0], chakra: "N/A",                       char: "𑖐",     phonetic: "Ga",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "White Lotus" },
+            { id: "B16", name: "Front Outer",           excelPos: [0.0,  0.0, -2.0], chakra: "N/A",                       char: "𑖤",     phonetic: "Ba",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
+            { id: "B17", name: "Right Outer",           excelPos: [2.0,  0.0,  0.0], chakra: "N/A",                       char: "𑖚",     phonetic: "Dda",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
+            { id: "B18", name: "Right Inner",           excelPos: [1.0,  0.0,  0.0], chakra: "N/A",                       char: "𑖭𑖿𑖪", phonetic: "Sva",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Purple Lotus" },
+            { id: "B19", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra",   char: "𑖓",     phonetic: "Ca",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
+            { id: "B20", name: "Left Inner",            excelPos: [-1.0, 0.0,  0.0], chakra: "N/A",                       char: "𑖞",     phonetic: "Tha",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Blue Lotus" },
+            { id: "B21", name: "Left Outer",            excelPos: [-2.0, 0.0,  0.0], chakra: "N/A",                       char: "𑖤",     phonetic: "Ba",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
+            { id: "B22", name: "Heart Chakra",          excelPos: [0.0,  0.2,  0.0], chakra: "4 - Heart Chakra",          char: "𑖪",     phonetic: "Va",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Integral Lotus" },
+            { id: "B23", name: "Throat Chakra+",        excelPos: [0.0,  0.5, -0.1], chakra: "N/A",                       char: "𑖝𑖿𑖭", phonetic: "Tsa",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Axe" },
+            { id: "B24", name: "Throat Chakra",         excelPos: [0.0,  0.5,  0.0], chakra: "5 - Throat Chakra",         char: "𑖬𑖿𑖘", phonetic: "Sstta", series: "Liên Hoa Bồ Đề Tâm",  dharma: "Pure Vase" },
+            { id: "B25", name: "High Above Head",       excelPos: [0.0,  1.5,  0.0], chakra: "N/A",                       char: "𑖧𑖿𑖭", phonetic: "Ysa",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Transformation Buddha Atop The Crown" },
+            // --- Series: Lục Tý ---
+            { id: "B26", name: "Joined Palm",           excelPos: [0.0,  0.2, -0.3], chakra: "N/A",                       char: "𑖑",     phonetic: "Gha",   series: "Lục Tý",              dharma: "Joined Palm" },
+            { id: "B27", name: "Lower Left Palm",       excelPos: [-0.2,-0.1, -0.3], chakra: "N/A",                       char: "𑖟",     phonetic: "Da",    series: "Lục Tý",              dharma: "Fearless Palm" },
+            { id: "B28", name: "Lower Right Palm",      excelPos: [0.2, -0.1, -0.3], chakra: "N/A",                       char: "𑖭",     phonetic: "Sa",    series: "Lục Tý",              dharma: "Sweet Dews" },
+            { id: "B29", name: "Upper Open Left Palm",  excelPos: [-0.5, 0.3, -0.5], chakra: "N/A",                       char: "𑖤",     phonetic: "Ba",    series: "Lục Tý",              dharma: "Sun Essence Mani" },
+            { id: "B30", name: "Upper Open Right Palm", excelPos: [0.5,  0.3, -0.5], chakra: "N/A",                       char: "𑖚",     phonetic: "Dda",   series: "Lục Tý",              dharma: "Moon Essence Mani" },
+            { id: "B31", name: "Meditation Mutra",      excelPos: [0.0, -0.1, -0.3], chakra: "N/A",                       char: "𑖛",     phonetic: "Ddha",  series: "Lục Tý",              dharma: "Thousand Hands & Eyes" },
+            // --- Series: Ending ---
+            { id: "B32", name: "Left Knee",             excelPos: [-0.5,-0.3, -0.4], chakra: "N/A",                       char: "𑖏",     phonetic: "Kha",   series: "Ending",              dharma: "Jewel Staff" },
+            { id: "B33", name: "Right Knee",            excelPos: [0.5, -0.3, -0.4], chakra: "N/A",                       char: "𑖀",     phonetic: "A",     series: "Ending",              dharma: "Cintamani Jewel" },
+            { id: "B34", name: "Center of Mandala",     excelPos: [0.0, -0.5,  0.0], chakra: "1 - Root Chakra",           char: "𑖣",     phonetic: "Pha",   series: "Ending",              dharma: "Non-retreating Dharma Wheel" }
+        ];
 
-    // ================================================================
-    // FAILSAFE: Force-dismiss loading screen after 4 seconds
-    // ================================================================
-    setTimeout(() => {
-        const overlay = document.getElementById('loading-overlay');
-        if (overlay && overlay.style.display !== 'none') {
-            console.warn('Loading timed out — force dismissing.');
-            overlay.style.opacity = 0;
-            setTimeout(() => { overlay.style.display = 'none'; }, 600);
+        // =========================================================================
+        // DOM references
+        // =========================================================================
+        const container          = document.getElementById('canvas-container');
+        const rotationSpeedInput = document.getElementById('rotation-speed');
+        const glowIntensityInput = document.getElementById('glow-intensity');
+        const uiContainer        = document.getElementById('ui-container');
+        const uiHeader           = document.getElementById('ui-header');
+        const uiToggleBtn        = document.getElementById('ui-toggle-btn');
+        const loadingOverlay     = document.getElementById('loading-overlay');
+        const loadingText        = document.getElementById('loading-text');
+
+        // =========================================================================
+        // Scene, Camera, Renderer
+        // =========================================================================
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x05070a, 0.03);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        const initialCameraPos = new THREE.Vector3(4.53, 3.5, -2.11);
+        initialCameraPos.applyAxisAngle(new THREE.Vector3(0, 1, 0), 40 * Math.PI / 180);
+        camera.position.copy(initialCameraPos);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxDistance = 30;
+        controls.minDistance = 2;
+        controls.target.set(0, 0, 0);
+
+        // =========================================================================
+        // Environment & Lights
+        // =========================================================================
+        function createStudioEnvMap() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#101622');
+            grad.addColorStop(0.5, '#05070a');
+            grad.addColorStop(1, '#020305');
+            ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(40, 20, 30, 40);
+            ctx.fillRect(180, 40, 40, 30);
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+            return texture;
         }
-    }, 4000);
+        scene.environment = createStudioEnvMap();
 
-    // ================================================================
-    // 1. SYLLABLE DATA
-    //    Layout (viewed from above, counterclockwise sequence):
-    //
-    //              VAM (back,  Z = -1)
-    //                    |
-    //    VÀ (left, X=-1) + VA (center) + VU (right, X=+1)
-    //                    |
-    //             VAH (front, Z = +1)
-    //
-    //    Sequence: VA → VÀ → VAM → VU → VAH → [clear] → VAvm2
-    //
-    //    CHANGE: Corrected image filenames for VAM and VU.
-    // ================================================================
-    const sphereData = [
-        {
-            id: 'va',
-            name: 'VA (Center Core)',
-            pos: [0.0, 0.1, 0.0],
-            chakra: '1. Ever-present Compassion',
-            image: '01_VA_Gold.PNG',
-            char: '𑖪',
-            phonetic: 'Va',
-            mantra: 'VA: ever-present compassion.\n"I am Compassion."\nThe syllable VA is always there, compassion is ever-present, whether clearly visualized or not.'
-        },
-        {
-            id: 'va_left',
-            name: 'VÀ (Left Wing)',
-            pos: [-1.0, 0.1, 0.0],
-            chakra: '2. Transcending Worldliness',
-            image: '02_VAA_Gold.PNG',
-            char: '𑖪𑖯',
-            phonetic: 'Và',
-            mantra: 'VÀ: the practice of compassion.\nInhale to VA and emanate energy, turning consciousness into loving energy radiating everywhere.'
-        },
-        {
-            id: 'vam_back',
-            name: 'VAM (At the Back)',
-            pos: [0.0, 0.1, -1.0],
-            chakra: '3. Realizing Emptiness',
-            image: '03_VAM_Gold.PNG',             // CHANGE: was 04_VAM_Gold.PNG
-            char: '𑖪𑖽',
-            phonetic: 'Vam',
-            mantra: 'VAM: the practice of being empty.\n"Let me become the wave."\nBecome pure consciousness, realizing that compassion and emptiness are just one.'
-        },
-        {
-            id: 'vu_right',
-            name: 'VU (Right Wing)',
-            pos: [1.0, 0.1, 0.0],
-            chakra: '4. Engaging with the World',
-            image: '04_VU_Gold.PNG',              // CHANGE: was 03_VU_Gold.PNG
-            char: '𑖪𑖲',
-            phonetic: 'Vu',
-            mantra: 'VU: the practice of vows, expansion & transformation.\nDirect your mind to open the hearts of all beings, engaging in the world to support and care for others.'
-        },
-        {
-            id: 'vah_front',
-            name: 'VAH (At the Front)',
-            pos: [0.0, 0.1, 1.0],
-            chakra: '5. Residing in Everyone\'s Heart',
-            image: '05_VAH_Gold.PNG',
-            char: '𑖪𑖾',
-            phonetic: 'Vah',
-            mantra: 'VAH: the practice of consummation.\nUltimate Reality (Non-dwelling Nirvana). Let the compassionate energy abide in every living being\'s heart.'
-        },
-        {
-            id: 'vavm2',
-            name: 'VAvm2 (Upgraded Core)',
-            pos: [0.0, 0.1, 0.0],
-            chakra: '6. Ultimate Upgraded Compassion',
-            image: '06_VAvm2_Gold.PNG',
-            char: '𑖪',
-            phonetic: 'Vavm2',
-            mantra: 'VAvm2: Upgraded ultimate state at the end of the 6-syllable cycle.\nThe complete transformation, upgrade, and realization of the Syllable VA cultivation.'
-        }
-    ];
+        scene.add(new THREE.AmbientLight(0xffffff, 0.15));
 
-    // ================================================================
-    // 2. SCENE, CAMERA, RENDERER
-    //    CHANGE: Camera position X and Z signs flipped to rotate the
-    //    initial view 180 degrees around the Y axis.
-    //    Before: (-0.347, 0.8, -1.97)
-    //    After:  ( 0.347, 0.8,  1.97)
-    // ================================================================
-    const container = document.getElementById('canvas-container');
+        const keyLight = new THREE.DirectionalLight(0xfff5e6, 2.0);
+        keyLight.position.set(5, 8, 5); keyLight.castShadow = true; scene.add(keyLight);
 
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x05070a, 0.05);
+        const fillLight = new THREE.DirectionalLight(0xdbe9ff, 1.0);
+        fillLight.position.set(-5, 3, -5); scene.add(fillLight);
 
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0.347, 0.8, 1.97);         // CHANGE: rotated 180° from (-0.347, 0.8, -1.97)
+        const rimLight = new THREE.DirectionalLight(0xffffff, 1.5);
+        rimLight.position.set(0, -5, 0); scene.add(rimLight);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    container.appendChild(renderer.domElement);
+        const coreLight = new THREE.PointLight(0x00aaff, 2.0, 5);
+        coreLight.position.set(0, 0, 0); scene.add(coreLight);
 
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.maxDistance = 12;
-    controls.minDistance = 0.5;
-    controls.target.set(0, 0.1, 0);
-
-    // ================================================================
-    // 3. PROCEDURAL ENVIRONMENT MAP
-    // ================================================================
-    (function buildEnvMap() {
-        const cvs = document.createElement('canvas');
-        cvs.width = 256; cvs.height = 128;
-        const ctx = cvs.getContext('2d');
-        const grad = ctx.createLinearGradient(0, 0, 0, 128);
-        grad.addColorStop(0,   '#101622');
-        grad.addColorStop(0.5, '#05070a');
-        grad.addColorStop(1,   '#020305');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 256, 128);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(40, 20, 30, 40);
-        ctx.fillRect(180, 40, 40, 30);
-        const tex = new THREE.CanvasTexture(cvs);
-        tex.mapping = THREE.EquirectangularReflectionMapping;
-        scene.environment = tex;
-    })();
-
-    // ================================================================
-    // 4. LIGHTING
-    // ================================================================
-    scene.add(new THREE.AmbientLight(0xffffff, 0.15));
-
-    const keyLight = new THREE.DirectionalLight(0xfff5e6, 2.0);
-    keyLight.position.set(5, 8, 5);
-    keyLight.castShadow = true;
-    scene.add(keyLight);
-
-    const fillLight = new THREE.DirectionalLight(0xdbe9ff, 1.0);
-    fillLight.position.set(-5, 3, -5);
-    scene.add(fillLight);
-
-    const rimLight = new THREE.DirectionalLight(0xffffff, 1.5);
-    rimLight.position.set(0, -5, 0);
-    scene.add(rimLight);
-
-    const coreLight = new THREE.PointLight(0x00aaff, 2.0, 5);
-    coreLight.position.set(0, 0, 0);
-    scene.add(coreLight);
-
-    // ================================================================
-    // 5. SHARED MATERIALS
-    // ================================================================
-    const matBlueGlass = new THREE.MeshPhysicalMaterial({
-        color: 0x88ddff, emissive: 0x0044aa, emissiveIntensity: 0.4,
-        roughness: 0.5, metalness: 0.1,
-        transmission: 0.75, ior: 1.5, thickness: 1.8,
-        transparent: true, opacity: 1.0,
-        side: THREE.DoubleSide, depthWrite: false
-    });
-
-    const matClearGlass = new THREE.MeshPhysicalMaterial({
-        color: 0xffffff, roughness: 0.05, metalness: 0.1,
-        transmission: 0.98, ior: 1.52, thickness: 0.3,
-        transparent: true, opacity: 1.0,
-        side: THREE.DoubleSide, depthWrite: false
-    });
-
-    const matHitbox = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.0, depthWrite: false });
-
-    // ================================================================
-    // 6. OUTER BUBBLE
-    // ================================================================
-    scene.add(new THREE.Mesh(new THREE.SphereGeometry(2.1, 64, 64), matClearGlass));
-
-    // ================================================================
-    // 7. BUDDHA MODEL
-    //    CHANGE: Buddha rotation.y updated from Math.PI / 2 to
-    //    -Math.PI / 2 (i.e., +180°) in both the GLB success path
-    //    and the procedural fallback figure.
-    //    Before: Math.PI / 2  (90°)
-    //    After: -Math.PI / 2  (270°, equivalent to 90° + 180°)
-    // ================================================================
-    const buddhaGroup = new THREE.Group();
-    scene.add(buddhaGroup);
-
-    const loadingOverlay = document.getElementById('loading-overlay');
-    const loadingText    = document.getElementById('loading-text');
-
-    // Shared dismiss helper — avoids duplicated fade logic
-    function dismissLoading(delay = 0) {
-        setTimeout(() => {
-            loadingOverlay.style.opacity = 0;
-            setTimeout(() => { loadingOverlay.style.display = 'none'; }, 600);
-        }, delay);
-    }
-
-    // Procedural fallback figure used when GLB is unavailable
-    function buildFallbackFigure() {
-        const g = new THREE.Group();
-        const head  = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), matBlueGlass);
-        head.position.y = 0.55;
-        const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.28, 0.65, 32), matBlueGlass);
-        torso.position.y = 0.1;
-        const legs  = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.12, 16, 100), matBlueGlass);
-        legs.rotation.x = Math.PI / 2;
-        legs.position.y = -0.25;
-        g.add(head, torso, legs);
-        g.position.set(0.0, -0.5, -0.18);
-        g.rotation.y = -Math.PI / 2;                // CHANGE: was Math.PI / 2
-        return g;
-    }
-
-    new THREE.GLTFLoader().load(
-        'glass+buddha+statue+3d+model.glb',
-        (gltf) => {
-            gltf.scene.traverse((node) => {
-                if (node.isMesh) {
-                    node.material = matBlueGlass;
-                    node.castShadow = node.receiveShadow = true;
-                }
-            });
-            gltf.scene.scale.setScalar(1.4);
-            gltf.scene.position.set(0.0, -0.5, -0.18);
-            gltf.scene.rotation.y = -Math.PI / 2;   // CHANGE: was Math.PI / 2
-            buddhaGroup.add(gltf.scene);
-            dismissLoading();
-        },
-        (xhr) => {
-            if (xhr.total > 0) {
-                loadingText.innerText = `Calibrating Syllable VA Matrix (${Math.round((xhr.loaded / xhr.total) * 100)}%)`;
-            }
-        },
-        (err) => {
-            console.warn('GLB not found — using procedural fallback.', err);
-            loadingText.innerText = 'Initializing Fallback System...';
-            buddhaGroup.add(buildFallbackFigure());
-            dismissLoading(1000);
-        }
-    );
-
-    // ================================================================
-    // 8. SYLLABLE SPHERES & CHARACTER PLANES
-    //    Shared geometries prevent redundant GPU buffer allocations.
-    // ================================================================
-    const spheresGroup = new THREE.Group();
-    scene.add(spheresGroup);
-
-    const characterPlanes  = [];
-    const clickableSpheres = [];
-    const textureLoader    = new THREE.TextureLoader();
-
-    const sharedHitboxGeo = new THREE.SphereGeometry(0.19, 32, 32);
-    const sharedPlaneGeo  = new THREE.PlaneGeometry(0.38, 0.38);
-
-    function createFallbackGlyphTexture(char) {
-        const cvs = document.createElement('canvas');
-        cvs.width = cvs.height = 512;
-        const ctx = cvs.getContext('2d');
-        ctx.clearRect(0, 0, 512, 512);
-        ctx.textAlign    = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.shadowColor  = '#ffd700';
-        ctx.shadowBlur   = 30;
-        ctx.fillStyle    = '#ffffff';
-        ctx.font         = 'bold 340px sans-serif';
-        ctx.fillText(char, 256, 256);
-        const tex = new THREE.CanvasTexture(cvs);
-        tex.encoding = THREE.sRGBEncoding;
-        return tex;
-    }
-
-    sphereData.forEach((data) => {
-        const pos = new THREE.Vector3(...data.pos);
-
-        // Invisible hitbox sphere
-        const sphere = new THREE.Mesh(sharedHitboxGeo, matHitbox);
-        sphere.position.copy(pos);
-        sphere.userData = { ...data, glow: 0.0 };
-        spheresGroup.add(sphere);
-        clickableSpheres.push(sphere);
-
-        // Glyph plane — starts with canvas fallback, replaced by PNG if available
-        const charMat = new THREE.MeshBasicMaterial({
-            map: createFallbackGlyphTexture(data.char),
-            transparent: true,
-            side: THREE.DoubleSide,
-            depthWrite: false,
-            blending: THREE.AdditiveBlending,
-            opacity: 0.0
+        // =========================================================================
+        // Materials
+        // =========================================================================
+        const privacyBlueGlass = new THREE.MeshPhysicalMaterial({
+            color: 0x88ddff, emissive: 0x0044aa, emissiveIntensity: 0.4,
+            roughness: 0.5, metalness: 0.1, transmission: 0.75, ior: 1.5, thickness: 1.8,
+            transparent: true, opacity: 1.0, side: THREE.DoubleSide, depthWrite: false
+        });
+        const clearBubbleGlass = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff, roughness: 0.05, metalness: 0.1, transmission: 0.98,
+            ior: 1.52, thickness: 0.3, transparent: true, opacity: 1.0,
+            side: THREE.DoubleSide, depthWrite: false
         });
 
-        const plane = new THREE.Mesh(sharedPlaneGeo, charMat);
-        plane.position.copy(pos);
-        spheresGroup.add(plane);
+        // =========================================================================
+        // Outer bubble
+        // =========================================================================
+        const outerBubble = new THREE.Mesh(new THREE.SphereGeometry(1.9, 64, 64), clearBubbleGlass);
+        scene.add(outerBubble);
 
-        textureLoader.load(
-            data.image,
-            (tex) => { tex.encoding = THREE.sRGBEncoding; charMat.map = tex; charMat.needsUpdate = true; },
-            undefined,
-            () => { console.log(`PNG unavailable — using glyph fallback for ${data.phonetic}`); }
+        // =========================================================================
+        // Buddha model
+        // =========================================================================
+        const buddhaGroup = new THREE.Group();
+        scene.add(buddhaGroup);
+
+        const loader = new THREE.GLTFLoader();
+        const MODEL_URL = 'glass+buddha+statue+3d+model.glb';
+
+        loader.load(MODEL_URL,
+            (gltf) => {
+                const buddhaMesh = gltf.scene;
+                buddhaMesh.traverse((node) => {
+                    if (node.isMesh) {
+                        node.material = privacyBlueGlass;
+                        node.castShadow = true; node.receiveShadow = true;
+                    }
+                });
+                buddhaMesh.scale.set(1.4, 1.4, 1.4);
+                buddhaMesh.position.set(0.0, -0.5, -0.18);
+                buddhaMesh.rotation.y = Math.PI / 2;
+                buddhaGroup.add(buddhaMesh);
+                loadingOverlay.style.opacity = 0;
+                setTimeout(() => { loadingOverlay.style.display = 'none'; }, 600);
+            },
+            (xhr) => {
+                if (xhr.total > 0) {
+                    const percent = Math.round((xhr.loaded / xhr.total) * 100);
+                    loadingText.innerText = `Calibrating Bodhicitta Matrix (${percent}%)`;
+                }
+            },
+            (err) => {
+                console.warn("Generating procedural fallback.", err);
+                const fallbackGroup = new THREE.Group();
+                const head = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), privacyBlueGlass);
+                head.position.y = 0.55; fallbackGroup.add(head);
+                const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.28, 0.65, 32), privacyBlueGlass);
+                torso.position.y = 0.1; fallbackGroup.add(torso);
+                const legs = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.12, 16, 100), privacyBlueGlass);
+                legs.rotation.x = Math.PI / 2; legs.position.y = -0.25; fallbackGroup.add(legs);
+                fallbackGroup.position.set(0.0, -0.5, -0.18);
+                fallbackGroup.rotation.y = Math.PI / 2;
+                buddhaGroup.add(fallbackGroup);
+                loadingOverlay.style.opacity = 0;
+                setTimeout(() => { loadingOverlay.style.display = 'none'; }, 600);
+            }
         );
 
-        characterPlanes.push({ mesh: plane, initialPos: pos.clone(), offset: Math.random() * Math.PI * 2 });
-    });
-
-    // ================================================================
-    // 8b. GOLDEN RIPPLE WAVES
-    //     sharedRippleGeo reused across all 18 meshes.
-    //     Each mesh keeps its own ShaderMaterial for independent opacity.
-    // ================================================================
-    const ripples         = [];
-    const NUM_RIPPLES     = 18;
-    const RIPPLE_MIN      = 0.19;
-    const RIPPLE_MAX      = 4.5;
-    const RIPPLE_SPEED    = 0.3;
-    const sharedRippleGeo = new THREE.SphereGeometry(1, 24, 24);
-
-    for (let i = 0; i < NUM_RIPPLES; i++) {
-        const mat = new THREE.ShaderMaterial({
-            uniforms: {
-                glowColor: { value: new THREE.Color(0xffd700) },
-                opacity:   { value: 0.0 }
-            },
-            vertexShader: `
-                varying vec3 vNormal;
-                void main() {
-                    vNormal = normalize(normalMatrix * normal);
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                uniform vec3 glowColor;
-                uniform float opacity;
-                varying vec3 vNormal;
-                void main() {
-                    float intensity = pow(1.0 - abs(vNormal.z), 2.5);
-                    gl_FragColor = vec4(glowColor * intensity * 1.5, intensity * opacity);
-                }
-            `,
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            side: THREE.DoubleSide,
-            depthWrite: false
-        });
-
-        const mesh = new THREE.Mesh(sharedRippleGeo, mat);
-        mesh.position.set(0.0, 0.1, 0.0);
-        scene.add(mesh);
-
-        ripples.push({
-            mesh,
-            material: mat,
-            radius: RIPPLE_MIN + (i * (RIPPLE_MAX - RIPPLE_MIN) / NUM_RIPPLES)
-        });
-    }
-
-    // ================================================================
-    // 9. GRID
-    // ================================================================
-    const grid = new THREE.GridHelper(8, 32, 0x00aaff, 0x141a24);
-    grid.position.y = -2.3;
-    scene.add(grid);
-
-    // ================================================================
-    // 10. COLLAPSIBLE MENU
-    // ================================================================
-    const uiContainer = document.getElementById('ui-container');
-    const uiToggleBtn = document.getElementById('ui-toggle-btn');
-    document.getElementById('ui-header').addEventListener('click', () => {
-        const collapsed = uiContainer.classList.toggle('collapsed');
-        uiToggleBtn.innerText = collapsed ? '▼' : '▲';
-    });
-
-    // ================================================================
-    // 11. CACHED UI CONTROL VALUES
-    //     Read DOM inputs once on change, not every animation frame.
-    // ================================================================
-    const rotationSpeedInput  = document.getElementById('rotation-speed');
-    const glowIntensityInput  = document.getElementById('glow-intensity');
-    const billboardModeSelect = document.getElementById('billboard-mode');
-
-    let cachedRPM       = parseFloat(rotationSpeedInput.value);
-    let cachedGlow      = parseFloat(glowIntensityInput.value);
-    let cachedBillboard = billboardModeSelect.value;
-
-    rotationSpeedInput.addEventListener('input',   () => { cachedRPM       = parseFloat(rotationSpeedInput.value); });
-    glowIntensityInput.addEventListener('input',   () => { cachedGlow      = parseFloat(glowIntensityInput.value); });
-    billboardModeSelect.addEventListener('change', () => { cachedBillboard = billboardModeSelect.value; });
-
-    // ================================================================
-    // 12. RAYCASTING & POPUP
-    //     Outline mesh created once, repositioned and toggled via
-    //     .visible — no per-click geometry or material allocation.
-    // ================================================================
-    const raycaster   = new THREE.Raycaster();
-    const mouse       = new THREE.Vector2();
-    const popupCard   = document.getElementById('popup-card');
-    const popupName   = document.getElementById('popup-name');
-    const popupChakra = document.getElementById('popup-chakra');
-    const popupGlyph  = document.getElementById('popup-glyph');
-    const popupCoords = document.getElementById('popup-coords');
-    const popupMantra = document.getElementById('popup-mantra');
-
-    const outlineMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.21, 16, 16),
-        new THREE.MeshBasicMaterial({ color: 0xffd700, wireframe: true, transparent: true, opacity: 0.6 })
-    );
-    outlineMesh.visible = false;
-    spheresGroup.add(outlineMesh);
-
-    function showPopup(data) {
-        popupName.innerText     = data.name;
-        popupChakra.innerText   = data.chakra;
-        popupGlyph.innerText    = `${data.char} (${data.phonetic})`;
-        popupCoords.innerText   = `X: ${data.pos[0].toFixed(1)}, Y: ${data.pos[1].toFixed(1)}, Z: ${data.pos[2].toFixed(1)}`;
-        popupMantra.textContent = data.mantra;
-        popupCard.classList.add('active');
-    }
-
-    function hidePopup() {
-        popupCard.classList.remove('active');
-        outlineMesh.visible = false;
-    }
-
-    document.getElementById('popup-close').addEventListener('click', (e) => {
-        e.stopPropagation();
-        hidePopup();
-    });
-
-    window.addEventListener('pointerdown', (event) => {
-        if (event.target.closest('#ui-container') || event.target.closest('#popup-card')) return;
-
-        const rect    = renderer.domElement.getBoundingClientRect();
-        const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-        const clientY = event.touches ? event.touches[0].clientY : event.clientY;
-
-        mouse.x =  ((clientX - rect.left) / rect.width)  * 2 - 1;
-        mouse.y = -((clientY - rect.top)  / rect.height) * 2 + 1;
-
-        raycaster.setFromCamera(mouse, camera);
-
-        const visible = clickableSpheres.filter((_, i) => characterPlanes[i].mesh.material.opacity > 0.1);
-        const hits    = raycaster.intersectObjects(visible);
-
-        if (hits.length > 0) {
-            const target = hits[0].object;
-            outlineMesh.position.copy(target.position);
-            outlineMesh.visible = true;
-            showPopup(target.userData);
-        } else {
-            hidePopup();
+        // =========================================================================
+        // Axial coordinate system — laser beams & labels (fixed in world space)
+        // =========================================================================
+        function createAxialLaserBeam(direction) {
+            const beamGroup = new THREE.Group();
+            const totalLength = 2.3, coneHeight = 0.15;
+            const cylinderLength = totalLength - coneHeight;
+            const cylinderRadius = 0.019, coneRadius = cylinderRadius * 2.2;
+            const mat = new THREE.MeshBasicMaterial({
+                color: 0x00d2ff, transparent: true, opacity: 0.8,
+                blending: THREE.AdditiveBlending, side: THREE.DoubleSide
+            });
+            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(cylinderRadius, cylinderRadius, cylinderLength, 16), mat);
+            shaft.position.y = cylinderLength / 2; beamGroup.add(shaft);
+            const head = new THREE.Mesh(new THREE.ConeGeometry(coneRadius, coneHeight, 16), mat);
+            head.position.y = cylinderLength + (coneHeight / 2); beamGroup.add(head);
+            beamGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+            return beamGroup;
         }
-    });
 
-    // ================================================================
-    // 13. DEBOUNCED RESIZE
-    // ================================================================
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
+        [
+            new THREE.Vector3( 1,  0,  0),
+            new THREE.Vector3(-1,  0,  0),
+            new THREE.Vector3( 0,  1,  0),
+            new THREE.Vector3( 0, -1,  0),
+            new THREE.Vector3( 0,  0,  1),
+            new THREE.Vector3( 0,  0, -1)
+        ].forEach((dir) => scene.add(createAxialLaserBeam(dir)));
+
+        function createAxisLabel(text, x, y, z) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 128, 128);
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#ffd700'; ctx.font = 'bold 36px sans-serif';
+            ctx.shadowColor = '#ffaa00'; ctx.shadowBlur = 10;
+            ctx.fillText(text, 64, 64);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true }));
+            sprite.position.set(x, y, z);
+            sprite.scale.set(0.6, 0.6, 1.0);
+            scene.add(sprite);
+        }
+        createAxisLabel("+X",  3.2,  0,    0);
+        createAxisLabel("-X", -3.2,  0,    0);
+        createAxisLabel("+Y",  0,    3.2,  0);
+        createAxisLabel("-Y",  0,   -3.2,  0);
+        createAxisLabel("+Z",  0,    0,    3.2);
+        createAxisLabel("-Z",  0,    0,   -3.2);
+
+        // =========================================================================
+        // UI bindings
+        // =========================================================================
+        uiHeader.addEventListener('click', () => {
+            const isCollapsed = uiContainer.classList.toggle('collapsed');
+            uiToggleBtn.innerText = isCollapsed ? '▼' : '▲';
+        });
+
+        window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-        }, 100);
-    });
+        });
 
-    // ================================================================
-    // 14. SEQUENCE STATE MACHINE
-    //     Counterclockwise order (viewed from above):
-    //       VA → VÀ (left) → VAM (back) → VU (right) → VAH (front)
-    //       → [clear] → VAvm2
-    // ================================================================
-    const sequenceStages = [
-        { id: 'va',        duration: 1.8  },  // 1. VA      — center
-        { id: 'va_left',   duration: 1.8  },  // 2. VÀ      — left  (-X)
-        { id: 'vam_back',  duration: 1.8  },  // 3. VAM     — back  (-Z)
-        { id: 'vu_right',  duration: 1.8  },  // 4. VU      — right (+X)
-        { id: 'vah_front', duration: 1.8  },  // 5. VAH     — front (+Z)
-        { id: 'clear',     duration: 3.0  },  //    pause   — all hidden
-        { id: 'vavm2',     duration: 10.0 }   // 6. VAvm2   — center (upgraded)
-    ];
+        // =========================================================================
+        // Animation loop
+        // =========================================================================
+        const clock = new THREE.Clock();
 
-    let seqIndex = 0;
-    let seqTimer = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            const elapsedTime = clock.getElapsedTime();
 
-    // Frame-rate independent lerp: consistent speed across all refresh rates
-    const LERP_HALF_LIFE = 0.1; // seconds
+            // Pulsing core glow
+            const glowVal = parseFloat(glowIntensityInput.value);
+            coreLight.intensity = (Math.sin(elapsedTime * 2) * 0.4 + 1.2) * glowVal;
+            coreLight.position.y = Math.sin(elapsedTime * 0.6) * 0.5;
 
-    function updateSequence(delta) {
-        seqTimer += delta;
-        if (seqTimer >= sequenceStages[seqIndex].duration) {
-            seqTimer = 0;
-            seqIndex = (seqIndex + 1) % sequenceStages.length;
+            // Auto-rotation (Buddha only; coordinate axes remain fixed)
+            const rpm = parseFloat(rotationSpeedInput.value);
+            const rotationStep = ((rpm * Math.PI * 2) / 60) * delta;
+            buddhaGroup.rotation.y += rotationStep;
+
+            controls.update();
+            renderer.render(scene, camera);
         }
 
-        const activeId  = sequenceStages[seqIndex].id;
-        const lerpAlpha = 1.0 - Math.exp(-delta / LERP_HALF_LIFE);
-
-        clickableSpheres.forEach((sphere, i) => {
-            const plane = characterPlanes[i].mesh;
-            const id    = sphere.userData.id;
-            let targetGlow = 0.0, targetOpacity = 0.0;
-
-            if (activeId === 'clear') {
-                // All hidden — targets remain 0
-            } else if (activeId === 'vavm2') {
-                if (id === 'vavm2') { targetGlow = 1.0; targetOpacity = 1.0; }
-            } else {
-                if (id !== 'vavm2') {
-                    if (id === activeId) {
-                        targetGlow    = 1.0;
-                        targetOpacity = 1.0;
-                    } else {
-                        targetOpacity = 0.3; // dimmed background state
-                    }
-                }
-            }
-
-            sphere.userData.glow   = THREE.MathUtils.lerp(sphere.userData.glow, targetGlow, lerpAlpha);
-            plane.material.opacity = THREE.MathUtils.lerp(plane.material.opacity, targetOpacity, lerpAlpha);
-            plane.scale.setScalar(1.0 + sphere.userData.glow * 0.25);
-            plane.material.color.setRGB(
-                1.0,
-                0.84 + sphere.userData.glow * 0.16,
-                sphere.userData.glow * 0.3
-            );
-        });
-    }
-
-    // ================================================================
-    // 15. ANIMATION LOOP
-    // ================================================================
-    const clock = new THREE.Clock();
-
-    function animate() {
-        requestAnimationFrame(animate);
-
-        const delta       = clock.getDelta();
-        const elapsed     = clock.getElapsedTime();
-        const rotPerFrame = (cachedRPM * Math.PI * 2 / 60) * delta;
-
-        spheresGroup.rotation.y += rotPerFrame;
-        buddhaGroup.rotation.y  += rotPerFrame;
-
-        coreLight.intensity = (Math.sin(elapsed * 2) * 0.3 + 1.0) * cachedGlow;
-
-        updateSequence(delta);
-
-        // Ripple waves
-        const rippleRange = RIPPLE_MAX - RIPPLE_MIN;
-        ripples.forEach((r) => {
-            r.radius += RIPPLE_SPEED * delta;
-            if (r.radius > RIPPLE_MAX) r.radius = RIPPLE_MIN;
-
-            r.mesh.scale.setScalar(r.radius);
-
-            const life    = (r.radius - RIPPLE_MIN) / rippleRange;
-            const opacity = life < 0.1 ? life / 0.1 : 1.0 - (life - 0.1) / 0.9;
-            r.material.uniforms.opacity.value = opacity * 0.45;
-        });
-
-        // Character plane float & billboard
-        characterPlanes.forEach((item) => {
-            item.mesh.position.y = item.initialPos.y + Math.sin(elapsed * 1.5 + item.offset) * 0.01;
-
-            if (cachedBillboard === 'billboard') {
-                item.mesh.quaternion.copy(camera.quaternion);
-            } else {
-                item.mesh.rotation.y = elapsed * 0.4 + item.offset;
-                item.mesh.rotation.x = 0;
-                item.mesh.rotation.z = 0;
-            }
-        });
-
-        controls.update();
-        renderer.render(scene, camera);
-    }
-
-    animate();
+        animate();
     </script>
 </body>
 </html>
-
