@@ -77,19 +77,22 @@
 
             <div class="control-group">
                 <label>Display Duration (s / node)</label>
-                <input type="range" id="interval-speed" min="1.5" max="8.0" step="0.5" value="3.5">
-                <span class="range-val" id="interval-label">3.5 s / node</span>
+                <!-- ✦ Changed default: 3.5 → 7.0 (7 sec character delay) -->
+                <input type="range" id="interval-speed" min="1.5" max="12.0" step="0.5" value="7.0">
+                <span class="range-val" id="interval-label">7.0 s / node</span>
             </div>
 
             <div class="control-group">
                 <label>Ripple Expansion Speed</label>
-                <input type="range" id="ripple-speed" min="0.3" max="2.5" step="0.1" value="0.9">
-                <span class="range-val" id="ripple-label">0.9</span>
+                <!-- ✦ Changed default: 0.9 → 1.6 -->
+                <input type="range" id="ripple-speed" min="0.3" max="2.5" step="0.1" value="1.6">
+                <span class="range-val" id="ripple-label">1.6</span>
             </div>
 
             <div class="control-group">
                 <label>Auto-Rotation (RPM)</label>
-                <input type="range" id="rotation-speed" min="0" max="10" step="0.1" value="0">
+                <!-- ✦ Changed default: 0 → 1 -->
+                <input type="range" id="rotation-speed" min="0" max="10" step="0.1" value="1">
             </div>
 
             <details>
@@ -179,7 +182,9 @@
         scene.fog = new THREE.FogExp2(0x05070a, 0.03);
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        const initialCameraPos = new THREE.Vector3(4.53, 3.5, -2.11);
+
+        // ✦ Lowered viewing angle: Y reduced from 3.5 → 1.8, distance kept natural
+        const initialCameraPos = new THREE.Vector3(4.53, 1.8, -2.11);
         initialCameraPos.applyAxisAngle(new THREE.Vector3(0, 1, 0), 40 * Math.PI / 180);
         camera.position.copy(initialCameraPos);
 
@@ -237,7 +242,6 @@
         const heartLight = new THREE.PointLight(0xaa00ff, 0.0, 4.5);
         heartLight.position.set(0, 0.2, 0); scene.add(heartLight);
 
-        // Golden core light — flashes on each pulse, then decays
         const goldenCore = new THREE.PointLight(0xffd700, 0.0, 9.0);
         goldenCore.position.set(0, 0, 0); scene.add(goldenCore);
 
@@ -394,95 +398,48 @@
 
         // =========================================================================
         // CONCENTRIC PULSE RIPPLE SYSTEM
-        //
-        // Design philosophy:
-        //   Each "heartbeat" emits a tight cluster of 3 sphere shells in rapid
-        //   succession (staggered 0.18 s apart).  Each shell is a single
-        //   SphereGeometry rendered with very low opacity + AdditiveBlending.
-        //   Because of spherical limb-brightening (more material depth at the
-        //   silhouette edge than at center), each shell naturally reads as a
-        //   crisp glowing ring from any camera angle — no inner/outer shell pair
-        //   needed.
-        //
-        //   The 3 shells per pulse give the "tight wavelength" look: three close
-        //   concentric rings travel together, then a clear gap, then the next
-        //   heartbeat group.
-        //
-        //   Opacity envelope: asymmetric — sharp rise (leading pressure crest),
-        //   then a smooth exponential decay (trailing fade).  This mimics the
-        //   bright forward edge of a real expanding pressure wave.
-        //
-        //   On each pulse trigger, goldenCore briefly flashes to visually
-        //   reinforce the "radiating from center" origin.
         // =========================================================================
+        const RIPPLE_GEO     = new THREE.SphereGeometry(1.0, 72, 36);
+        const PULSE_PERIOD   = 1.6;
+        const RINGS_PER_PULSE = 3;
+        const RING_STAGGER   = 0.16;
+        const RING_DURATION  = 5.5;
+        const RING_MAX_RADIUS = 3.8;
 
-        // Single shared geometry — high segment count for smooth silhouette
-        const RIPPLE_GEO = new THREE.SphereGeometry(1.0, 72, 36);
-
-        // Pulse parameters (all in seconds)
-        const PULSE_PERIOD   = 1.6;    // time between heartbeat pulses
-        const RINGS_PER_PULSE = 3;     // shells per pulse group
-        const RING_STAGGER   = 0.16;   // delay between shells within a pulse
-        const RING_DURATION  = 5.5;    // lifetime of each shell (slow travel)
-        const RING_MAX_RADIUS = 3.8;   // maximum expansion radius
-
-        // Per-ring opacity and colour within a pulse group
-        // Leading ring: brightest.  Trailing rings: progressively dimmer.
         const PULSE_RINGS = [
-            { peakOpacity: 0.13, colorHex: 0xffd700 },  // leading — bright gold
-            { peakOpacity: 0.09, colorHex: 0xffcc33 },  // middle  — warm amber
-            { peakOpacity: 0.06, colorHex: 0xffe57a },  // trailing — pale gold
+            { peakOpacity: 0.13, colorHex: 0xffd700 },
+            { peakOpacity: 0.09, colorHex: 0xffcc33 },
+            { peakOpacity: 0.06, colorHex: 0xffe57a },
         ];
 
-        const activeRipples  = [];   // live shell meshes
-        const pendingSpawns  = [];   // { countdown, ringDef } queued by stagger
-        let   pulseTimer     = 0;    // counts up to PULSE_PERIOD
-        let   goldenFlash    = 0;    // 0→1, drives goldenCore spike
+        const activeRipples  = [];
+        const pendingSpawns  = [];
+        let   pulseTimer     = 0;
+        let   goldenFlash    = 0;
 
-        // Asymmetric opacity envelope:
-        //   rise phase (t < riseT):  linear 0 → 1
-        //   fall phase (t ≥ riseT):  exponential decay
-        // Result: bright leading crest, long gentle tail — pure pressure-wave shape
         function rippleOpacity(t, peak) {
-            const riseT = 0.08; // crest reached at 8 % of journey (near origin burst)
-            if (t < riseT) {
-                return peak * (t / riseT);
-            }
-            // Exponential decay from crest to zero over remaining 92 % of journey
-            // k chosen so opacity ≈ 2 % of peak at t = 1.0
-            const k = -Math.log(0.02) / (1.0 - riseT); // ≈ 4.59 / 0.92 ≈ 3.9
+            const riseT = 0.08;
+            if (t < riseT) return peak * (t / riseT);
+            const k = -Math.log(0.02) / (1.0 - riseT);
             return peak * Math.exp(-k * (t - riseT));
         }
 
         function spawnSingleRing(ringDef) {
             const mat = new THREE.MeshBasicMaterial({
-                color:       ringDef.colorHex,
-                transparent: true,
-                opacity:     0,
-                side:        THREE.DoubleSide,
-                depthWrite:  false,
-                blending:    THREE.AdditiveBlending
+                color: ringDef.colorHex, transparent: true, opacity: 0,
+                side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending
             });
             const mesh = new THREE.Mesh(RIPPLE_GEO, mat);
             mesh.scale.setScalar(0.001);
-            mesh.userData = {
-                age:         0,
-                peakOpacity: ringDef.peakOpacity
-            };
+            mesh.userData = { age: 0, peakOpacity: ringDef.peakOpacity };
             scene.add(mesh);
             activeRipples.push(mesh);
         }
 
         function triggerPulse() {
-            // Flash the golden core light
             goldenFlash = 1.0;
-
-            // Queue staggered ring spawns
             for (let i = 0; i < RINGS_PER_PULSE; i++) {
-                pendingSpawns.push({
-                    countdown: i * RING_STAGGER,
-                    ringDef:   PULSE_RINGS[i]
-                });
+                pendingSpawns.push({ countdown: i * RING_STAGGER, ringDef: PULSE_RINGS[i] });
             }
         }
 
@@ -513,7 +470,7 @@
             isRunning    = true;
             currentIndex = 0;
             seqTimer     = 0;
-            pulseTimer   = PULSE_PERIOD; // fire first pulse immediately
+            pulseTimer   = PULSE_PERIOD;
             showNode(0);
         }
 
@@ -548,15 +505,15 @@
             const glowVal     = parseFloat(glowIntensityInput.value);
             const rippleSpd   = Math.max(0.1, parseFloat(rippleSpeedInput.value));
 
-            // --- Core blue pulse ---
+            // Core blue pulse
             coreLight.intensity  = (Math.sin(elapsedTime * 2.0) * 0.4 + 1.2) * glowVal;
             coreLight.position.y = Math.sin(elapsedTime * 0.6) * 0.5;
 
-            // --- Golden core flash: spike on pulse, fast exponential decay ---
+            // Golden core flash decay
             goldenFlash = Math.max(0, goldenFlash - delta * 3.5);
             goldenCore.intensity = goldenFlash * 2.8 * glowVal;
 
-            // --- Sequencer ---
+            // Sequencer
             if (isRunning) {
                 seqTimer += delta;
                 const interval = parseFloat(intervalSpeedInput.value);
@@ -567,7 +524,7 @@
                 }
             }
 
-            // --- Active node animate ---
+            // Active node animate
             if (isRunning && currentIndex >= 0) {
                 const d = animationNodes[currentIndex];
 
@@ -578,7 +535,6 @@
                     d.sphereMesh.scale.setScalar(fadeIn * pulse);
                     d.sphereMesh.material.emissiveIntensity =
                         fadeIn * (0.75 + Math.sin(elapsedTime * 3.2) * 0.25) * glowVal;
-
                     heartLight.position.set(d.excelPos[0], d.excelPos[1], d.excelPos[2]);
                     heartLight.intensity = fadeIn * (0.9 + Math.sin(elapsedTime * 3.2) * 0.35) * glowVal;
                 }
@@ -591,18 +547,14 @@
                 heartLight.intensity = 0.0;
             }
 
-            // -----------------------------------------------------------------------
-            // PULSE HEARTBEAT TIMER
-            // Fires a new group of 3 staggered rings every PULSE_PERIOD seconds.
-            // Speed slider scales expansion rate only — pulse rhythm stays constant.
-            // -----------------------------------------------------------------------
+            // Pulse heartbeat
             pulseTimer += delta;
             if (pulseTimer >= PULSE_PERIOD) {
                 pulseTimer -= PULSE_PERIOD;
                 triggerPulse();
             }
 
-            // Resolve pending staggered ring spawns
+            // Resolve staggered spawns
             for (let i = pendingSpawns.length - 1; i >= 0; i--) {
                 pendingSpawns[i].countdown -= delta;
                 if (pendingSpawns[i].countdown <= 0) {
@@ -611,31 +563,14 @@
                 }
             }
 
-            // -----------------------------------------------------------------------
-            // RIPPLE SHELL UPDATE
-            //
-            // Each shell advances its own age, scaled by rippleSpd so the user
-            // can control how fast shells travel without changing pulse rhythm.
-            //
-            // Scale:   t × RING_MAX_RADIUS  (linear, uniform expansion)
-            //
-            // Opacity: rippleOpacity(t, peak)
-            //   – sharp leading crest (bright burst at small t, near-origin)
-            //   – long gentle exponential tail
-            //   Combined with additive blending + limb brightening, each shell
-            //   looks like a crisp glowing ring from every viewing angle.
-            // -----------------------------------------------------------------------
+            // Ripple shell update
             const effectiveDuration = RING_DURATION / rippleSpd;
-
             for (let i = activeRipples.length - 1; i >= 0; i--) {
                 const r = activeRipples[i];
                 r.userData.age += delta;
-
                 const t = Math.min(r.userData.age / effectiveDuration, 1.0);
-
                 r.scale.setScalar(Math.max(0.001, t * RING_MAX_RADIUS));
                 r.material.opacity = rippleOpacity(t, r.userData.peakOpacity) * glowVal;
-
                 if (t >= 1.0) {
                     scene.remove(r);
                     r.material.dispose();
@@ -643,7 +578,7 @@
                 }
             }
 
-            // --- Auto-rotation (Buddha only) ---
+            // ✦ Auto-rotation at 1 RPM default
             const rpm = parseFloat(rotationSpeedInput.value);
             buddhaGroup.rotation.y += ((rpm * Math.PI * 2) / 60) * delta;
 
