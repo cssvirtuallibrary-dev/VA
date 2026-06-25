@@ -13,8 +13,21 @@
         }
         #canvas-container { width: 100vw; height: 100vh; display: block; }
 
+        /* Start Button */
+        #action-container { position: absolute; top: 15px; left: 15px; z-index: 30; pointer-events: auto; }
+        #start-btn {
+            background: #ffd700; color: #05070a; border: 1px solid rgba(255, 215, 0, 0.6);
+            padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 1.5px; font-size: 12px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.35);
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        #start-btn:hover { background: #ffe240; box-shadow: 0 0 30px rgba(255, 215, 0, 0.6); transform: translateY(-2px); }
+        #start-btn:active { transform: translateY(1px); }
+
+        /* Control Panel */
         #ui-container {
-            position: absolute; top: 15px; left: 15px;
+            position: absolute; top: 75px; left: 15px;
             background: rgba(10, 15, 25, 0.85); padding: 14px 18px; border-radius: 14px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.08);
             width: 290px; pointer-events: auto;
@@ -39,6 +52,38 @@
         details { background: rgba(20, 26, 36, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px 10px; margin-top: 8px; }
         summary { font-size: 10px; color: #ffd700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; outline: none; user-select: none; }
 
+        /* Node Info HUD */
+        #node-hud {
+            position: absolute; bottom: 25px; left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background: rgba(10, 15, 25, 0.88); border: 1px solid rgba(170, 0, 255, 0.35);
+            border-radius: 14px; padding: 14px 20px; width: 85%; max-width: 340px;
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+            opacity: 0; pointer-events: none; z-index: 20;
+            box-shadow: 0 0 30px rgba(170, 0, 255, 0.2);
+        }
+        #node-hud.active { transform: translateX(-50%) translateY(0); opacity: 1; }
+        #hud-id   { font-size: 10px; color: #aa00ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        #hud-name { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; letter-spacing: 0.5px; }
+        #hud-phonetic {
+            font-family: Georgia, serif; font-style: italic;
+            font-size: 28px; color: #ffd700; text-align: center;
+            padding: 8px 0; border-top: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+        .hud-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+        .hud-label { color: #77849a; }
+        .hud-val   { color: #ddd; font-weight: 500; }
+        #hud-progress { display: flex; gap: 6px; margin-top: 10px; justify-content: center; }
+        .hud-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: rgba(170, 0, 255, 0.25); border: 1px solid rgba(170, 0, 255, 0.5);
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+        .hud-dot.active { background: #aa00ff; transform: scale(1.4); box-shadow: 0 0 8px #aa00ff; }
+
         #loading-overlay {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #05070a; display: flex; flex-direction: column;
@@ -49,7 +94,9 @@
         #loading-text { margin-top: 16px; color: #ffd700; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; }
 
         @media (max-width: 600px) {
-            #ui-container { width: calc(100% - 30px); max-width: none; top: 15px; left: 10px; }
+            #action-container { width: calc(100% - 30px); left: 10px; top: 10px; }
+            #start-btn { width: 100%; text-align: center; }
+            #ui-container { width: calc(100% - 30px); max-width: none; top: 75px; left: 10px; }
             #ui-container.collapsed { width: calc(100% - 30px); }
         }
     </style>
@@ -65,6 +112,10 @@
         <div id="loading-text">Calibrating Lotus Bodhicitta System...</div>
     </div>
 
+    <div id="action-container">
+        <button id="start-btn">Start Formation</button>
+    </div>
+
     <div id="canvas-container"></div>
 
     <div id="ui-container">
@@ -73,7 +124,13 @@
             <button id="ui-toggle-btn">▲</button>
         </div>
         <div id="ui-content">
-            <p>3D Buddha Bodhicitta meditation environment with axial coordinate system.</p>
+            <p>VA Viên Mãn — looping Siddham meditation sequence at the Heart Chakra.</p>
+
+            <div class="control-group">
+                <label>Sequence Interval (seconds)</label>
+                <input type="range" id="interval-speed" min="0.5" max="6" step="0.5" value="2.5">
+                <span id="interval-label" style="font-size:10px;color:#aaa;display:block;margin-top:4px;">2.5 s / node</span>
+            </div>
 
             <div class="control-group">
                 <label>Auto-Rotation Speed (RPM)</label>
@@ -89,64 +146,139 @@
         </div>
     </div>
 
+    <!-- Node Info HUD -->
+    <div id="node-hud">
+        <div id="hud-id">A01 — VA Viên Mãn</div>
+        <div id="hud-name">Heart Chakra</div>
+        <div id="hud-phonetic">𑖪</div>
+        <div class="hud-row"><span class="hud-label">Chakra:</span><span class="hud-val" id="hud-chakra">-</span></div>
+        <div class="hud-row"><span class="hud-label">Position:</span><span class="hud-val" id="hud-pos">-</span></div>
+        <div class="hud-row"><span class="hud-label">Phonetic:</span><span class="hud-val" id="hud-phon">-</span></div>
+        <div id="hud-progress"></div>
+    </div>
+
     <script>
         // =========================================================================
-        // DATA — names, chakras & coordinates (preserved reference)
+        // REFERENCE DATA — baseSphereData (coordinates & naming preserved)
         // Coordinate convention: excelPos = [X, Y-up, Z-depth]
-        // Render mapping: threeX = excelPos[0], threeY = excelPos[1], threeZ = excelPos[2]
         // =========================================================================
         const baseSphereData = [
             // --- Series: Thường Trụ Bất Biến ---
-            { id: "B01", name: "Forehead",              excelPos: [0.0,  0.8, -0.1], chakra: "6 - Third Eye Chakra",    char: "𑖀",     phonetic: "A",     series: "Thường Trụ Bất Biến", dharma: "Cintamani Jewel" },
-            { id: "B02", name: "Sacral Chakra",         excelPos: [0.0, -0.2,  0.0], chakra: "2 - Sacral Chakra",       char: "𑖢",     phonetic: "Pa",    series: "Thường Trụ Bất Biến", dharma: "Jewel Bowl" },
-            { id: "B03", name: "Front Center",          excelPos: [0.0,  0.0, -0.1], chakra: "N/A",                     char: "𑖨",     phonetic: "Ra",    series: "Thường Trụ Bất Biến", dharma: "Lariat Rope" },
-            { id: "B04", name: "Behind Center",         excelPos: [0.0,  0.0,  0.1], chakra: "N/A",                     char: "𑖜",     phonetic: "Nna",   series: "Thường Trụ Bất Biến", dharma: "Jewel Beads" },
-            { id: "B05", name: "Above Right Knee",      excelPos: [0.5,  0.0, -0.5], chakra: "N/A",                     char: "𑖬",     phonetic: "Ssa",   series: "Thường Trụ Bất Biến", dharma: "Jewel Bow" },
-            { id: "B06", name: "Above Left Knee",       excelPos: [-0.5, 0.0, -0.5], chakra: "N/A",                     char: "𑖪",     phonetic: "Va",    series: "Thường Trụ Bất Biến", dharma: "Jewel Arrow" },
+            { id: "B01", name: "Forehead",              excelPos: [0.0,  0.8, -0.1], chakra: "6 - Third Eye Chakra",    char: "𑖀",     phonetic: "A",        series: "Thường Trụ Bất Biến", dharma: "Cintamani Jewel" },
+            { id: "B02", name: "Sacral Chakra",         excelPos: [0.0, -0.2,  0.0], chakra: "2 - Sacral Chakra",       char: "𑖢",     phonetic: "Pa",       series: "Thường Trụ Bất Biến", dharma: "Jewel Bowl" },
+            { id: "B03", name: "Front Center",          excelPos: [0.0,  0.0, -0.1], chakra: "N/A",                     char: "𑖨",     phonetic: "Ra",       series: "Thường Trụ Bất Biến", dharma: "Lariat Rope" },
+            { id: "B04", name: "Behind Center",         excelPos: [0.0,  0.0,  0.1], chakra: "N/A",                     char: "𑖜",     phonetic: "Nna",      series: "Thường Trụ Bất Biến", dharma: "Jewel Beads" },
+            { id: "B05", name: "Above Right Knee",      excelPos: [0.5,  0.0, -0.5], chakra: "N/A",                     char: "𑖬",     phonetic: "Ssa",      series: "Thường Trụ Bất Biến", dharma: "Jewel Bow" },
+            { id: "B06", name: "Above Left Knee",       excelPos: [-0.5, 0.0, -0.5], chakra: "N/A",                     char: "𑖪",     phonetic: "Va",       series: "Thường Trụ Bất Biến", dharma: "Jewel Arrow" },
             // --- Series: Liên Hoa Bồ Đề Tâm ---
-            { id: "B07", name: "Bottom Outer",          excelPos: [0.0, -2.0,  0.0], chakra: "N/A",                     char: "𑖚",     phonetic: "Dda",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
-            { id: "B08", name: "Bottom Inner",          excelPos: [0.0, -1.0,  0.0], chakra: "N/A",                     char: "𑖧",     phonetic: "Ya",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Treasure Chest" },
-            { id: "B09", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra", char: "𑖓",     phonetic: "Ca",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
-            { id: "B10", name: "Top Inner",             excelPos: [0.0,  1.0,  0.0], chakra: "7 - Crown Chakra",        char: "𑖭",     phonetic: "Sa",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sweet Dews" },
-            { id: "B11", name: "Top Outer",             excelPos: [0.0,  2.0,  0.0], chakra: "N/A",                     char: "𑖤",     phonetic: "Ba",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
-            { id: "B12", name: "Back Outer",            excelPos: [0.0,  0.0,  2.0], chakra: "N/A",                     char: "𑖚",     phonetic: "Dda",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
-            { id: "B13", name: "Back Inner",            excelPos: [0.0,  0.0,  1.0], chakra: "N/A",                     char: "𑖎𑖿𑖬", phonetic: "Kssa",  series: "Liên Hoa Bồ Đề Tâm",  dharma: "Red Lotus" },
-            { id: "B14", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra", char: "𑖓",     phonetic: "Ca",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
-            { id: "B15", name: "Front Inner",           excelPos: [0.0,  0.0, -1.0], chakra: "N/A",                     char: "𑖐",     phonetic: "Ga",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "White Lotus" },
-            { id: "B16", name: "Front Outer",           excelPos: [0.0,  0.0, -2.0], chakra: "N/A",                     char: "𑖤",     phonetic: "Ba",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
-            { id: "B17", name: "Right Outer",           excelPos: [2.0,  0.0,  0.0], chakra: "N/A",                     char: "𑖚",     phonetic: "Dda",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
-            { id: "B18", name: "Right Inner",           excelPos: [1.0,  0.0,  0.0], chakra: "N/A",                     char: "𑖭𑖿𑖪", phonetic: "Sva",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Purple Lotus" },
-            { id: "B19", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra", char: "𑖓",     phonetic: "Ca",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
-            { id: "B20", name: "Left Inner",            excelPos: [-1.0, 0.0,  0.0], chakra: "N/A",                     char: "𑖞",     phonetic: "Tha",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Blue Lotus" },
-            { id: "B21", name: "Left Outer",            excelPos: [-2.0, 0.0,  0.0], chakra: "N/A",                     char: "𑖤",     phonetic: "Ba",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
-            { id: "B22", name: "Heart Chakra",          excelPos: [0.0,  0.2,  0.0], chakra: "4 - Heart Chakra",        char: "𑖪",     phonetic: "Va",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Integral Lotus" },
-            { id: "B23", name: "Throat Chakra+",        excelPos: [0.0,  0.5, -0.1], chakra: "N/A",                     char: "𑖝𑖿𑖭", phonetic: "Tsa",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Axe" },
-            { id: "B24", name: "Throat Chakra",         excelPos: [0.0,  0.5,  0.0], chakra: "5 - Throat Chakra",       char: "𑖬𑖿𑖘", phonetic: "Sstta", series: "Liên Hoa Bồ Đề Tâm",  dharma: "Pure Vase" },
-            { id: "B25", name: "High Above Head",       excelPos: [0.0,  1.5,  0.0], chakra: "N/A",                     char: "𑖧𑖿𑖭", phonetic: "Ysa",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Transformation Buddha Atop The Crown" },
+            { id: "B07", name: "Bottom Outer",          excelPos: [0.0, -2.0,  0.0], chakra: "N/A",                     char: "𑖚",     phonetic: "Dda",      series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
+            { id: "B08", name: "Bottom Inner",          excelPos: [0.0, -1.0,  0.0], chakra: "N/A",                     char: "𑖧",     phonetic: "Ya",       series: "Liên Hoa Bồ Đề Tâm",  dharma: "Treasure Chest" },
+            { id: "B09", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra", char: "𑖓",     phonetic: "Ca",       series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
+            { id: "B10", name: "Top Inner",             excelPos: [0.0,  1.0,  0.0], chakra: "7 - Crown Chakra",        char: "𑖭",     phonetic: "Sa",       series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sweet Dews" },
+            { id: "B11", name: "Top Outer",             excelPos: [0.0,  2.0,  0.0], chakra: "N/A",                     char: "𑖤",     phonetic: "Ba",       series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
+            { id: "B12", name: "Back Outer",            excelPos: [0.0,  0.0,  2.0], chakra: "N/A",                     char: "𑖚",     phonetic: "Dda",      series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
+            { id: "B13", name: "Back Inner",            excelPos: [0.0,  0.0,  1.0], chakra: "N/A",                     char: "𑖎𑖿𑖬", phonetic: "Kssa",     series: "Liên Hoa Bồ Đề Tâm",  dharma: "Red Lotus" },
+            { id: "B14", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra", char: "𑖓",     phonetic: "Ca",       series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
+            { id: "B15", name: "Front Inner",           excelPos: [0.0,  0.0, -1.0], chakra: "N/A",                     char: "𑖐",     phonetic: "Ga",       series: "Liên Hoa Bồ Đề Tâm",  dharma: "White Lotus" },
+            { id: "B16", name: "Front Outer",           excelPos: [0.0,  0.0, -2.0], chakra: "N/A",                     char: "𑖤",     phonetic: "Ba",       series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
+            { id: "B17", name: "Right Outer",           excelPos: [2.0,  0.0,  0.0], chakra: "N/A",                     char: "𑖚",     phonetic: "Dda",      series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
+            { id: "B18", name: "Right Inner",           excelPos: [1.0,  0.0,  0.0], chakra: "N/A",                     char: "𑖭𑖿𑖪", phonetic: "Sva",      series: "Liên Hoa Bồ Đề Tâm",  dharma: "Purple Lotus" },
+            { id: "B19", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra", char: "𑖓",     phonetic: "Ca",       series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
+            { id: "B20", name: "Left Inner",            excelPos: [-1.0, 0.0,  0.0], chakra: "N/A",                     char: "𑖞",     phonetic: "Tha",      series: "Liên Hoa Bồ Đề Tâm",  dharma: "Blue Lotus" },
+            { id: "B21", name: "Left Outer",            excelPos: [-2.0, 0.0,  0.0], chakra: "N/A",                     char: "𑖤",     phonetic: "Ba",       series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
+            { id: "B22", name: "Heart Chakra",          excelPos: [0.0,  0.2,  0.0], chakra: "4 - Heart Chakra",        char: "𑖪",     phonetic: "Va",       series: "Liên Hoa Bồ Đề Tâm",  dharma: "Integral Lotus" },
+            { id: "B23", name: "Throat Chakra+",        excelPos: [0.0,  0.5, -0.1], chakra: "N/A",                     char: "𑖝𑖿𑖭", phonetic: "Tsa",      series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Axe" },
+            { id: "B24", name: "Throat Chakra",         excelPos: [0.0,  0.5,  0.0], chakra: "5 - Throat Chakra",       char: "𑖬𑖿𑖘", phonetic: "Sstta",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Pure Vase" },
+            { id: "B25", name: "High Above Head",       excelPos: [0.0,  1.5,  0.0], chakra: "N/A",                     char: "𑖧𑖿𑖭", phonetic: "Ysa",      series: "Liên Hoa Bồ Đề Tâm",  dharma: "Transformation Buddha Atop The Crown" },
             // --- Series: Lục Tý ---
-            { id: "B26", name: "Joined Palm",           excelPos: [0.0,  0.2, -0.3], chakra: "N/A",                     char: "𑖑",     phonetic: "Gha",   series: "Lục Tý",              dharma: "Joined Palm" },
-            { id: "B27", name: "Lower Left Palm",       excelPos: [-0.2,-0.1, -0.3], chakra: "N/A",                     char: "𑖟",     phonetic: "Da",    series: "Lục Tý",              dharma: "Fearless Palm" },
-            { id: "B28", name: "Lower Right Palm",      excelPos: [0.2, -0.1, -0.3], chakra: "N/A",                     char: "𑖭",     phonetic: "Sa",    series: "Lục Tý",              dharma: "Sweet Dews" },
-            { id: "B29", name: "Upper Open Left Palm",  excelPos: [-0.5, 0.3, -0.5], chakra: "N/A",                     char: "𑖤",     phonetic: "Ba",    series: "Lục Tý",              dharma: "Sun Essence Mani" },
-            { id: "B30", name: "Upper Open Right Palm", excelPos: [0.5,  0.3, -0.5], chakra: "N/A",                     char: "𑖚",     phonetic: "Dda",   series: "Lục Tý",              dharma: "Moon Essence Mani" },
-            { id: "B31", name: "Meditation Mutra",      excelPos: [0.0, -0.1, -0.3], chakra: "N/A",                     char: "𑖛",     phonetic: "Ddha",  series: "Lục Tý",              dharma: "Thousand Hands & Eyes" },
+            { id: "B26", name: "Joined Palm",           excelPos: [0.0,  0.2, -0.3], chakra: "N/A",                     char: "𑖑",     phonetic: "Gha",      series: "Lục Tý",              dharma: "Joined Palm" },
+            { id: "B27", name: "Lower Left Palm",       excelPos: [-0.2,-0.1, -0.3], chakra: "N/A",                     char: "𑖟",     phonetic: "Da",       series: "Lục Tý",              dharma: "Fearless Palm" },
+            { id: "B28", name: "Lower Right Palm",      excelPos: [0.2, -0.1, -0.3], chakra: "N/A",                     char: "𑖭",     phonetic: "Sa",       series: "Lục Tý",              dharma: "Sweet Dews" },
+            { id: "B29", name: "Upper Open Left Palm",  excelPos: [-0.5, 0.3, -0.5], chakra: "N/A",                     char: "𑖤",     phonetic: "Ba",       series: "Lục Tý",              dharma: "Sun Essence Mani" },
+            { id: "B30", name: "Upper Open Right Palm", excelPos: [0.5,  0.3, -0.5], chakra: "N/A",                     char: "𑖚",     phonetic: "Dda",      series: "Lục Tý",              dharma: "Moon Essence Mani" },
+            { id: "B31", name: "Meditation Mutra",      excelPos: [0.0, -0.1, -0.3], chakra: "N/A",                     char: "𑖛",     phonetic: "Ddha",     series: "Lục Tý",              dharma: "Thousand Hands & Eyes" },
             // --- Series: Ending ---
-            { id: "B32", name: "Left Knee",             excelPos: [-0.5,-0.3, -0.4], chakra: "N/A",                     char: "𑖏",     phonetic: "Kha",   series: "Ending",              dharma: "Jewel Staff" },
-            { id: "B33", name: "Right Knee",            excelPos: [0.5, -0.3, -0.4], chakra: "N/A",                     char: "𑖀",     phonetic: "A",     series: "Ending",              dharma: "Cintamani Jewel" },
-            { id: "B34", name: "Center of Mandala",     excelPos: [0.0, -0.5,  0.0], chakra: "1 - Root Chakra",         char: "𑖣",     phonetic: "Pha",   series: "Ending",              dharma: "Non-retreating Dharma Wheel" }
+            { id: "B32", name: "Left Knee",             excelPos: [-0.5,-0.3, -0.4], chakra: "N/A",                     char: "𑖏",     phonetic: "Kha",      series: "Ending",              dharma: "Jewel Staff" },
+            { id: "B33", name: "Right Knee",            excelPos: [0.5, -0.3, -0.4], chakra: "N/A",                     char: "𑖀",     phonetic: "A",        series: "Ending",              dharma: "Cintamani Jewel" },
+            { id: "B34", name: "Center of Mandala",     excelPos: [0.0, -0.5,  0.0], chakra: "1 - Root Chakra",         char: "𑖣",     phonetic: "Pha",      series: "Ending",              dharma: "Non-retreating Dharma Wheel" }
+        ];
+
+        // =========================================================================
+        // VA Viên Mãn — animation sequence nodes (A01–A06)
+        // =========================================================================
+        const animationNodes = [
+            {
+                id: "A01", name: "Heart Chakra",
+                excelPos: [0.0, 0.2, 0.0],
+                chakra: "4 - Heart Chakra",
+                image: "01_VA_Gold.PNG",
+                char: "𑖪", phonetic: "Va",
+                series: "VA Viên Mãn"
+            },
+            {
+                id: "A02", name: "Heart Chakra",
+                excelPos: [0.0, 0.2, 0.0],
+                chakra: "5 - Heart Chakra",
+                image: "02_VAA_Gold.PNG",
+                char: "𑖪𑖯", phonetic: "Vā",
+                series: "VA Viên Mãn"
+            },
+            {
+                id: "A03", name: "Front of Heart Chakra",
+                excelPos: [0.0, 0.2, -0.2],
+                chakra: "N/A",
+                image: "03_VU_Gold.PNG",
+                char: "𑖪𑖼", phonetic: "Vam",
+                series: "VA Viên Mãn"
+            },
+            {
+                id: "A04", name: "Heart Chakra",
+                excelPos: [0.0, 0.2, 0.0],
+                chakra: "5 - Heart Chakra",
+                image: "04_VAM_Gold.PNG",
+                char: "𑖪𑖲", phonetic: "Vu",
+                series: "VA Viên Mãn"
+            },
+            {
+                id: "A05", name: "Heart Chakra",
+                excelPos: [0.0, 0.2, 0.0],
+                chakra: "6 - Heart Chakra",
+                image: "05_VAH_Gold.PNG",
+                char: "𑖪𑖾", phonetic: "Vah",
+                series: "VA Viên Mãn"
+            },
+            {
+                id: "A06", name: "Heart Chakra",
+                excelPos: [0.0, 0.2, 0.0],
+                chakra: "7 - Heart Chakra",
+                image: "06_VAvm2_Gold.PNG",
+                char: "𑖪𑖲𑖯𑖼𑖾", phonetic: "VA Perfect",
+                series: "VA Viên Mãn"
+            }
         ];
 
         // =========================================================================
         // DOM references
         // =========================================================================
         const container          = document.getElementById('canvas-container');
+        const startBtn           = document.getElementById('start-btn');
         const rotationSpeedInput = document.getElementById('rotation-speed');
+        const intervalSpeedInput = document.getElementById('interval-speed');
+        const intervalLabel      = document.getElementById('interval-label');
         const glowIntensityInput = document.getElementById('glow-intensity');
         const uiContainer        = document.getElementById('ui-container');
         const uiHeader           = document.getElementById('ui-header');
         const uiToggleBtn        = document.getElementById('ui-toggle-btn');
         const loadingOverlay     = document.getElementById('loading-overlay');
         const loadingText        = document.getElementById('loading-text');
+        const nodeHud            = document.getElementById('node-hud');
+        const hudId              = document.getElementById('hud-id');
+        const hudName            = document.getElementById('hud-name');
+        const hudPhonetic        = document.getElementById('hud-phonetic');
+        const hudChakra          = document.getElementById('hud-chakra');
+        const hudPos             = document.getElementById('hud-pos');
+        const hudPhon            = document.getElementById('hud-phon');
+        const hudProgress        = document.getElementById('hud-progress');
 
         // =========================================================================
         // Scene, Camera, Renderer
@@ -197,18 +329,19 @@
         scene.environment = createStudioEnvMap();
 
         scene.add(new THREE.AmbientLight(0xffffff, 0.15));
-
         const keyLight = new THREE.DirectionalLight(0xfff5e6, 2.0);
         keyLight.position.set(5, 8, 5); keyLight.castShadow = true; scene.add(keyLight);
-
         const fillLight = new THREE.DirectionalLight(0xdbe9ff, 1.0);
         fillLight.position.set(-5, 3, -5); scene.add(fillLight);
-
         const rimLight = new THREE.DirectionalLight(0xffffff, 1.5);
         rimLight.position.set(0, -5, 0); scene.add(rimLight);
-
         const coreLight = new THREE.PointLight(0x00aaff, 2.0, 5);
         coreLight.position.set(0, 0, 0); scene.add(coreLight);
+
+        // Purple heart-chakra accent light (activated during sequence)
+        const heartLight = new THREE.PointLight(0xaa00ff, 0.0, 3.5);
+        heartLight.position.set(0, 0.2, 0);
+        scene.add(heartLight);
 
         // =========================================================================
         // Materials
@@ -237,9 +370,8 @@
         scene.add(buddhaGroup);
 
         const loader = new THREE.GLTFLoader();
-        const MODEL_URL = 'glass+buddha+statue+3d+model.glb';
-
-        loader.load(MODEL_URL,
+        loader.load(
+            'glass+buddha+statue+3d+model.glb',
             (gltf) => {
                 const buddhaMesh = gltf.scene;
                 buddhaMesh.traverse((node) => {
@@ -257,29 +389,29 @@
             },
             (xhr) => {
                 if (xhr.total > 0) {
-                    const percent = Math.round((xhr.loaded / xhr.total) * 100);
-                    loadingText.innerText = `Calibrating Bodhicitta Matrix (${percent}%)`;
+                    const pct = Math.round((xhr.loaded / xhr.total) * 100);
+                    loadingText.innerText = `Calibrating Bodhicitta Matrix (${pct}%)`;
                 }
             },
             (err) => {
-                console.warn("Generating procedural fallback.", err);
-                const fallbackGroup = new THREE.Group();
-                const head = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), privacyBlueGlass);
-                head.position.y = 0.55; fallbackGroup.add(head);
+                console.warn("Procedural fallback active.", err);
+                const fg = new THREE.Group();
+                const head  = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), privacyBlueGlass);
+                head.position.y = 0.55; fg.add(head);
                 const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.28, 0.65, 32), privacyBlueGlass);
-                torso.position.y = 0.1; fallbackGroup.add(torso);
-                const legs = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.12, 16, 100), privacyBlueGlass);
-                legs.rotation.x = Math.PI / 2; legs.position.y = -0.25; fallbackGroup.add(legs);
-                fallbackGroup.position.set(0.0, -0.5, -0.18);
-                fallbackGroup.rotation.y = Math.PI / 2;
-                buddhaGroup.add(fallbackGroup);
+                torso.position.y = 0.1; fg.add(torso);
+                const legs  = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.12, 16, 100), privacyBlueGlass);
+                legs.rotation.x = Math.PI / 2; legs.position.y = -0.25; fg.add(legs);
+                fg.position.set(0.0, -0.5, -0.18);
+                fg.rotation.y = Math.PI / 2;
+                buddhaGroup.add(fg);
                 loadingOverlay.style.opacity = 0;
                 setTimeout(() => { loadingOverlay.style.display = 'none'; }, 600);
             }
         );
 
         // =========================================================================
-        // Axis labels (coordinate naming preserved)
+        // Axis labels (coordinate naming preserved, no laser beams)
         // =========================================================================
         function createAxisLabel(text, x, y, z) {
             const canvas = document.createElement('canvas');
@@ -290,7 +422,9 @@
             ctx.fillStyle = '#ffd700'; ctx.font = 'bold 36px sans-serif';
             ctx.shadowColor = '#ffaa00'; ctx.shadowBlur = 10;
             ctx.fillText(text, 64, 64);
-            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true }));
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+                map: new THREE.CanvasTexture(canvas), transparent: true
+            }));
             sprite.position.set(x, y, z);
             sprite.scale.set(0.6, 0.6, 1.0);
             scene.add(sprite);
@@ -303,8 +437,165 @@
         createAxisLabel("-Z",  0,    0,   -3.2);
 
         // =========================================================================
+        // VA Viên Mãn — sphere & glyph plane creation
+        // =========================================================================
+        const nodeSphereGeo = new THREE.SphereGeometry(0.15, 32, 32);
+        const nodePlaneGeo  = new THREE.PlaneGeometry(0.30, 0.30);
+        const textureLoader = new THREE.TextureLoader();
+
+        function createFallbackGlyphTexture(char, phonetic) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 512, 512);
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.shadowColor = '#aa00ff'; ctx.shadowBlur = 30;
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 220px sans-serif';
+            ctx.fillText(char, 256, 210);
+            ctx.shadowBlur = 8; ctx.fillStyle = '#cc88ff'; ctx.font = '600 46px sans-serif';
+            ctx.fillText(phonetic.toUpperCase(), 256, 400);
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.colorSpace = THREE.SRGBColorSpace;
+            return tex;
+        }
+
+        // Build progress dots in HUD
+        animationNodes.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'hud-dot';
+            dot.id = `hud-dot-${i}`;
+            hudProgress.appendChild(dot);
+        });
+
+        // Create meshes for each animation node
+        animationNodes.forEach((data) => {
+            const pos = new THREE.Vector3(data.excelPos[0], data.excelPos[1], data.excelPos[2]);
+
+            // Purple glass sphere
+            const mat = new THREE.MeshPhysicalMaterial({
+                color: 0xaa00ff,
+                emissive: new THREE.Color(0x660099),
+                emissiveIntensity: 0.0,
+                roughness: 0.08, metalness: 0.05,
+                transmission: 0.85, ior: 1.52, thickness: 0.25,
+                transparent: true, opacity: 1.0,
+                side: THREE.DoubleSide, depthWrite: false
+            });
+            const sphere = new THREE.Mesh(nodeSphereGeo, mat);
+            sphere.position.copy(pos);
+            sphere.visible = false;
+            scene.add(sphere);
+            data.sphereMesh = sphere;
+
+            // Glyph plane with fallback canvas texture
+            const charMat = new THREE.MeshBasicMaterial({
+                map: createFallbackGlyphTexture(data.char, data.phonetic),
+                transparent: true, side: THREE.DoubleSide,
+                depthWrite: false, blending: THREE.AdditiveBlending
+            });
+            const plane = new THREE.Mesh(nodePlaneGeo, charMat);
+            plane.position.copy(pos);
+            plane.visible = false;
+            scene.add(plane);
+            data.planeMesh = plane;
+
+            // Attempt to load PNG texture (try uppercase then lowercase extension)
+            textureLoader.load(
+                data.image,
+                (tex) => {
+                    tex.colorSpace = THREE.SRGBColorSpace;
+                    charMat.map = tex; charMat.needsUpdate = true;
+                },
+                undefined,
+                () => {
+                    textureLoader.load(
+                        data.image.replace('.PNG', '.png'),
+                        (tex) => {
+                            tex.colorSpace = THREE.SRGBColorSpace;
+                            charMat.map = tex; charMat.needsUpdate = true;
+                        }
+                    );
+                }
+            );
+        });
+
+        // =========================================================================
+        // Sequencer state
+        // =========================================================================
+        let currentIndex = -1;
+        let isRunning    = false;
+        let seqTimer     = 0;
+
+        function getNodeInterval() {
+            return parseFloat(intervalSpeedInput.value);
+        }
+
+        function updateHUD(index) {
+            if (index < 0) { nodeHud.classList.remove('active'); return; }
+            const d = animationNodes[index];
+            hudId.innerText       = `${d.id} — ${d.series}`;
+            hudName.innerText     = d.name;
+            hudPhonetic.innerText = d.char;
+            hudChakra.innerText   = d.chakra;
+            hudPos.innerText      = `X:${d.excelPos[0].toFixed(1)}  Y:${d.excelPos[1].toFixed(1)}  Z:${d.excelPos[2].toFixed(1)}`;
+            hudPhon.innerText     = d.phonetic;
+            nodeHud.classList.add('active');
+            // Progress dots
+            animationNodes.forEach((_, i) => {
+                const dot = document.getElementById(`hud-dot-${i}`);
+                if (dot) dot.classList.toggle('active', i === index);
+            });
+        }
+
+        function showNode(index) {
+            // Hide all nodes first
+            animationNodes.forEach((d) => {
+                if (d.sphereMesh) { d.sphereMesh.visible = false; d.sphereMesh.scale.setScalar(1.0); d.sphereMesh.material.emissiveIntensity = 0.0; }
+                if (d.planeMesh)  { d.planeMesh.visible  = false; d.planeMesh.scale.setScalar(1.0); }
+            });
+            // Show the target node
+            if (index >= 0 && index < animationNodes.length) {
+                const d = animationNodes[index];
+                if (d.sphereMesh) d.sphereMesh.visible = true;
+                if (d.planeMesh)  d.planeMesh.visible  = true;
+                updateHUD(index);
+            }
+        }
+
+        function resetAnimation() {
+            isRunning    = false;
+            currentIndex = -1;
+            seqTimer     = 0;
+            animationNodes.forEach((d) => {
+                if (d.sphereMesh) { d.sphereMesh.visible = false; d.sphereMesh.scale.setScalar(1.0); d.sphereMesh.material.emissiveIntensity = 0.0; }
+                if (d.planeMesh)  { d.planeMesh.visible  = false; d.planeMesh.scale.setScalar(1.0); }
+            });
+            heartLight.intensity = 0.0;
+            nodeHud.classList.remove('active');
+            startBtn.innerText = "Start Formation";
+        }
+
+        // =========================================================================
         // UI bindings
         // =========================================================================
+        startBtn.addEventListener('click', () => {
+            if (isRunning) {
+                resetAnimation();
+            } else {
+                resetAnimation();
+                isRunning    = true;
+                currentIndex = 0;
+                showNode(0);
+                startBtn.innerText = "Reset";
+                uiContainer.classList.add('collapsed');
+                uiToggleBtn.innerText = '▼';
+            }
+        });
+
+        intervalSpeedInput.addEventListener('input', () => {
+            intervalLabel.innerText = `${parseFloat(intervalSpeedInput.value).toFixed(1)} s / node`;
+        });
+
         uiHeader.addEventListener('click', () => {
             const isCollapsed = uiContainer.classList.toggle('collapsed');
             uiToggleBtn.innerText = isCollapsed ? '▼' : '▲';
@@ -323,7 +614,7 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            const delta = clock.getDelta();
+            const delta       = clock.getDelta();
             const elapsedTime = clock.getElapsedTime();
 
             // Pulsing core glow
@@ -331,10 +622,46 @@
             coreLight.intensity = (Math.sin(elapsedTime * 2) * 0.4 + 1.2) * glowVal;
             coreLight.position.y = Math.sin(elapsedTime * 0.6) * 0.5;
 
-            // Auto-rotation (Buddha only; axis labels remain fixed in world space)
+            // Sequence stepping (looping)
+            if (isRunning) {
+                seqTimer += delta;
+                if (seqTimer >= getNodeInterval()) {
+                    seqTimer = 0;
+                    // Wrap to next node, loop infinitely
+                    currentIndex = (currentIndex + 1) % animationNodes.length;
+                    showNode(currentIndex);
+                }
+
+                // Animate the active node
+                if (currentIndex >= 0) {
+                    const d = animationNodes[currentIndex];
+
+                    // Sphere: pulse scale + emissive glow
+                    if (d.sphereMesh && d.sphereMesh.visible) {
+                        const pulse = 1.0 + Math.sin(elapsedTime * 4.0) * 0.12;
+                        d.sphereMesh.scale.setScalar(pulse);
+                        d.sphereMesh.material.emissiveIntensity =
+                            (Math.sin(elapsedTime * 4.0) * 0.5 + 1.5) * glowVal;
+                    }
+
+                    // Glyph plane: float + slow spin
+                    if (d.planeMesh && d.planeMesh.visible) {
+                        const floatY = d.excelPos[1] + Math.sin(elapsedTime * 2.0) * 0.018;
+                        d.planeMesh.position.y = floatY;
+                        d.planeMesh.rotation.y = elapsedTime * 0.6;
+                    }
+
+                    // Heart-chakra accent light follows active node position
+                    heartLight.position.set(d.excelPos[0], d.excelPos[1], d.excelPos[2]);
+                    heartLight.intensity = (Math.sin(elapsedTime * 4.0) * 0.4 + 1.2) * glowVal;
+                }
+            } else {
+                heartLight.intensity = 0.0;
+            }
+
+            // Auto-rotation (Buddha only; world-space labels stay fixed)
             const rpm = parseFloat(rotationSpeedInput.value);
-            const rotationStep = ((rpm * Math.PI * 2) / 60) * delta;
-            buddhaGroup.rotation.y += rotationStep;
+            buddhaGroup.rotation.y += ((rpm * Math.PI * 2) / 60) * delta;
 
             controls.update();
             renderer.render(scene, camera);
