@@ -73,7 +73,7 @@
             <button id="ui-toggle-btn">▲</button>
         </div>
         <div id="ui-content">
-            <p>Siddham Heart Chakra meditation — auto-looping A01–A06 with concentric golden ripple spheres emanating from center.</p>
+            <p>Siddham Heart Chakra meditation — auto-looping A01–A06 with concentric golden pulse waves from center core.</p>
 
             <div class="control-group">
                 <label>Display Duration (s / node)</label>
@@ -83,8 +83,8 @@
 
             <div class="control-group">
                 <label>Ripple Expansion Speed</label>
-                <input type="range" id="ripple-speed" min="0.3" max="3.0" step="0.1" value="1.2">
-                <span class="range-val" id="ripple-label">1.2</span>
+                <input type="range" id="ripple-speed" min="0.3" max="2.5" step="0.1" value="0.9">
+                <span class="range-val" id="ripple-label">0.9</span>
             </div>
 
             <div class="control-group">
@@ -237,9 +237,9 @@
         const heartLight = new THREE.PointLight(0xaa00ff, 0.0, 4.5);
         heartLight.position.set(0, 0.2, 0); scene.add(heartLight);
 
-        // Soft golden ambient that breathes with the ripple field
-        const goldenAmbient = new THREE.PointLight(0xffd700, 0.5, 10.0);
-        goldenAmbient.position.set(0, 0, 0); scene.add(goldenAmbient);
+        // Golden core light — flashes on each pulse, then decays
+        const goldenCore = new THREE.PointLight(0xffd700, 0.0, 9.0);
+        goldenCore.position.set(0, 0, 0); scene.add(goldenCore);
 
         // =========================================================================
         // Materials
@@ -331,7 +331,6 @@
 
         // =========================================================================
         // Node spheres & glyph planes
-        // Purple sphere radius 0.20 (size 1.0) — plane 0.26×0.26 fully inside
         // =========================================================================
         const NODE_SPHERE_GEO = new THREE.SphereGeometry(0.20, 32, 32);
         const NODE_PLANE_GEO  = new THREE.PlaneGeometry(0.26, 0.26);
@@ -394,88 +393,97 @@
         });
 
         // =========================================================================
-        // 3-D BALLOON RIPPLE SYSTEM
+        // CONCENTRIC PULSE RIPPLE SYSTEM
         //
-        // Each ripple is a pair of concentric sphere shells (inner + outer) rendered
-        // with DoubleSide + AdditiveBlending.  The two shells travel together,
-        // separated by a fixed gap in radius, giving a thin "membrane" appearance
-        // that reads as a single volumetric wave-front — like a soap-bubble balloon
-        // expanding outward in all directions simultaneously.
+        // Design philosophy:
+        //   Each "heartbeat" emits a tight cluster of 3 sphere shells in rapid
+        //   succession (staggered 0.18 s apart).  Each shell is a single
+        //   SphereGeometry rendered with very low opacity + AdditiveBlending.
+        //   Because of spherical limb-brightening (more material depth at the
+        //   silhouette edge than at center), each shell naturally reads as a
+        //   crisp glowing ring from any camera angle — no inner/outer shell pair
+        //   needed.
         //
-        // Opacity envelope:  flattened sine bell  sin(t·π)^0.30
-        //   – exponent < 0.5 gives a very wide, flat plateau (gentle long wavelength)
-        //   – rises quickly from 0, holds near-peak for most of the journey, fades out
+        //   The 3 shells per pulse give the "tight wavelength" look: three close
+        //   concentric rings travel together, then a clear gap, then the next
+        //   heartbeat group.
         //
-        // Three colour tones cycle per wave to create subtle shimmer depth.
+        //   Opacity envelope: asymmetric — sharp rise (leading pressure crest),
+        //   then a smooth exponential decay (trailing fade).  This mimics the
+        //   bright forward edge of a real expanding pressure wave.
         //
-        // Spawn interval scales with user "Ripple Expansion Speed" so faster speed
-        // keeps the same visual density of concentric waves on screen.
+        //   On each pulse trigger, goldenCore briefly flashes to visually
+        //   reinforce the "radiating from center" origin.
         // =========================================================================
 
-        // Shared geometry — two shells per wave (inner / outer membrane)
-        // High segment count → perfectly smooth sphere silhouette
-        const SHELL_GEO_OUTER = new THREE.SphereGeometry(1.000, 80, 40);
-        const SHELL_GEO_INNER = new THREE.SphereGeometry(0.930, 80, 40); // 7 % narrower → thin membrane gap
+        // Single shared geometry — high segment count for smooth silhouette
+        const RIPPLE_GEO = new THREE.SphereGeometry(1.0, 72, 36);
 
-        const RIPPLE_MAX_RADIUS  = 4.5;   // world-units at full expansion
-        const RIPPLE_DURATION    = 3.2;   // seconds — slow, languid balloon travel
-        const BASE_SPAWN_INTERVAL = 0.55; // seconds between wave launches at speed = 1.0
+        // Pulse parameters (all in seconds)
+        const PULSE_PERIOD   = 1.6;    // time between heartbeat pulses
+        const RINGS_PER_PULSE = 3;     // shells per pulse group
+        const RING_STAGGER   = 0.16;   // delay between shells within a pulse
+        const RING_DURATION  = 5.5;    // lifetime of each shell (slow travel)
+        const RING_MAX_RADIUS = 3.8;   // maximum expansion radius
 
-        // Warm gold palette — rotates per wave
-        const WAVE_PALETTE = [
-            { hex: 0xffd700, peak: 0.30 },  // classic gold
-            { hex: 0xffcc22, peak: 0.24 },  // amber gold
-            { hex: 0xffe57a, peak: 0.20 },  // pale gold
-            { hex: 0xffb347, peak: 0.22 },  // warm amber
+        // Per-ring opacity and colour within a pulse group
+        // Leading ring: brightest.  Trailing rings: progressively dimmer.
+        const PULSE_RINGS = [
+            { peakOpacity: 0.13, colorHex: 0xffd700 },  // leading — bright gold
+            { peakOpacity: 0.09, colorHex: 0xffcc33 },  // middle  — warm amber
+            { peakOpacity: 0.06, colorHex: 0xffe57a },  // trailing — pale gold
         ];
 
-        const activeRipples  = [];
-        let   rippleSpawnTimer = 0;
-        let   rippleWaveIndex  = 0;
+        const activeRipples  = [];   // live shell meshes
+        const pendingSpawns  = [];   // { countdown, ringDef } queued by stagger
+        let   pulseTimer     = 0;    // counts up to PULSE_PERIOD
+        let   goldenFlash    = 0;    // 0→1, drives goldenCore spike
 
-        // Flat bell opacity curve: sin(t·π)^exponent
-        // exponent 0.28 → very broad plateau, gentle wavelength
-        function flatBell(t, peak, exponent = 0.28) {
-            return peak * Math.pow(Math.sin(t * Math.PI), exponent);
+        // Asymmetric opacity envelope:
+        //   rise phase (t < riseT):  linear 0 → 1
+        //   fall phase (t ≥ riseT):  exponential decay
+        // Result: bright leading crest, long gentle tail — pure pressure-wave shape
+        function rippleOpacity(t, peak) {
+            const riseT = 0.08; // crest reached at 8 % of journey (near origin burst)
+            if (t < riseT) {
+                return peak * (t / riseT);
+            }
+            // Exponential decay from crest to zero over remaining 92 % of journey
+            // k chosen so opacity ≈ 2 % of peak at t = 1.0
+            const k = -Math.log(0.02) / (1.0 - riseT); // ≈ 4.59 / 0.92 ≈ 3.9
+            return peak * Math.exp(-k * (t - riseT));
         }
 
-        function spawnBalloonWave() {
-            const palette = WAVE_PALETTE[rippleWaveIndex % WAVE_PALETTE.length];
-            rippleWaveIndex++;
-
-            // Outer shell — the leading bright membrane
-            const matOuter = new THREE.MeshBasicMaterial({
-                color:       palette.hex,
+        function spawnSingleRing(ringDef) {
+            const mat = new THREE.MeshBasicMaterial({
+                color:       ringDef.colorHex,
                 transparent: true,
                 opacity:     0,
                 side:        THREE.DoubleSide,
                 depthWrite:  false,
                 blending:    THREE.AdditiveBlending
             });
+            const mesh = new THREE.Mesh(RIPPLE_GEO, mat);
+            mesh.scale.setScalar(0.001);
+            mesh.userData = {
+                age:         0,
+                peakOpacity: ringDef.peakOpacity
+            };
+            scene.add(mesh);
+            activeRipples.push(mesh);
+        }
 
-            // Inner shell — slightly dimmer trailing edge, creates membrane thickness
-            const matInner = new THREE.MeshBasicMaterial({
-                color:       palette.hex,
-                transparent: true,
-                opacity:     0,
-                side:        THREE.DoubleSide,
-                depthWrite:  false,
-                blending:    THREE.AdditiveBlending
-            });
+        function triggerPulse() {
+            // Flash the golden core light
+            goldenFlash = 1.0;
 
-            const meshOuter = new THREE.Mesh(SHELL_GEO_OUTER, matOuter);
-            const meshInner = new THREE.Mesh(SHELL_GEO_INNER, matInner);
-
-            // Both shells start at origin, invisible
-            meshOuter.scale.setScalar(0.001);
-            meshInner.scale.setScalar(0.001);
-
-            meshOuter.userData = { age: 0, duration: RIPPLE_DURATION, peakOpacity: palette.peak, isOuter: true };
-            meshInner.userData = { age: 0, duration: RIPPLE_DURATION, peakOpacity: palette.peak * 0.55, isOuter: false };
-
-            scene.add(meshOuter);
-            scene.add(meshInner);
-            activeRipples.push(meshOuter, meshInner);
+            // Queue staggered ring spawns
+            for (let i = 0; i < RINGS_PER_PULSE; i++) {
+                pendingSpawns.push({
+                    countdown: i * RING_STAGGER,
+                    ringDef:   PULSE_RINGS[i]
+                });
+            }
         }
 
         // =========================================================================
@@ -505,6 +513,7 @@
             isRunning    = true;
             currentIndex = 0;
             seqTimer     = 0;
+            pulseTimer   = PULSE_PERIOD; // fire first pulse immediately
             showNode(0);
         }
 
@@ -543,8 +552,9 @@
             coreLight.intensity  = (Math.sin(elapsedTime * 2.0) * 0.4 + 1.2) * glowVal;
             coreLight.position.y = Math.sin(elapsedTime * 0.6) * 0.5;
 
-            // --- Golden ambient breathes gently ---
-            goldenAmbient.intensity = (Math.sin(elapsedTime * 0.9) * 0.15 + 0.4) * glowVal;
+            // --- Golden core flash: spike on pulse, fast exponential decay ---
+            goldenFlash = Math.max(0, goldenFlash - delta * 3.5);
+            goldenCore.intensity = goldenFlash * 2.8 * glowVal;
 
             // --- Sequencer ---
             if (isRunning) {
@@ -582,30 +592,40 @@
             }
 
             // -----------------------------------------------------------------------
-            // BALLOON RIPPLE UPDATE
-            //
-            // effectiveDuration = RIPPLE_DURATION / rippleSpd
-            //   → faster slider = shorter life = same max radius reached faster
-            //
-            // Scale:   t × RIPPLE_MAX_RADIUS  (linear balloon expansion)
-            //
-            // Opacity: flatBell(t, peak, 0.28)
-            //   The very low exponent (0.28) produces an extremely wide, flat-topped
-            //   bell.  This mimics the long-wavelength "swell" of a soap bubble or
-            //   slow pressure wave — bright across most of its travel, not just a
-            //   sharp crest, then gently dissolving at the far edge.
-            //
-            // Inner shell travels at 93 % of outer radius → persistent thin membrane
-            // appearance regardless of viewing angle.
+            // PULSE HEARTBEAT TIMER
+            // Fires a new group of 3 staggered rings every PULSE_PERIOD seconds.
+            // Speed slider scales expansion rate only — pulse rhythm stays constant.
             // -----------------------------------------------------------------------
-            rippleSpawnTimer += delta;
-            const dynSpawnInterval = BASE_SPAWN_INTERVAL / rippleSpd;
-            if (rippleSpawnTimer >= dynSpawnInterval) {
-                rippleSpawnTimer -= dynSpawnInterval;
-                spawnBalloonWave();
+            pulseTimer += delta;
+            if (pulseTimer >= PULSE_PERIOD) {
+                pulseTimer -= PULSE_PERIOD;
+                triggerPulse();
             }
 
-            const effectiveDuration = RIPPLE_DURATION / rippleSpd;
+            // Resolve pending staggered ring spawns
+            for (let i = pendingSpawns.length - 1; i >= 0; i--) {
+                pendingSpawns[i].countdown -= delta;
+                if (pendingSpawns[i].countdown <= 0) {
+                    spawnSingleRing(pendingSpawns[i].ringDef);
+                    pendingSpawns.splice(i, 1);
+                }
+            }
+
+            // -----------------------------------------------------------------------
+            // RIPPLE SHELL UPDATE
+            //
+            // Each shell advances its own age, scaled by rippleSpd so the user
+            // can control how fast shells travel without changing pulse rhythm.
+            //
+            // Scale:   t × RING_MAX_RADIUS  (linear, uniform expansion)
+            //
+            // Opacity: rippleOpacity(t, peak)
+            //   – sharp leading crest (bright burst at small t, near-origin)
+            //   – long gentle exponential tail
+            //   Combined with additive blending + limb brightening, each shell
+            //   looks like a crisp glowing ring from every viewing angle.
+            // -----------------------------------------------------------------------
+            const effectiveDuration = RING_DURATION / rippleSpd;
 
             for (let i = activeRipples.length - 1; i >= 0; i--) {
                 const r = activeRipples[i];
@@ -613,13 +633,8 @@
 
                 const t = Math.min(r.userData.age / effectiveDuration, 1.0);
 
-                // Outer shell: full linear expansion
-                // Inner shell: 93 % of outer to keep membrane gap constant
-                const baseRadius = t * RIPPLE_MAX_RADIUS;
-                r.scale.setScalar(Math.max(0.001, r.userData.isOuter ? baseRadius : baseRadius * 0.93));
-
-                // Flat bell opacity — plateau across most of the balloon's life
-                r.material.opacity = flatBell(t, r.userData.peakOpacity) * glowVal;
+                r.scale.setScalar(Math.max(0.001, t * RING_MAX_RADIUS));
+                r.material.opacity = rippleOpacity(t, r.userData.peakOpacity) * glowVal;
 
                 if (t >= 1.0) {
                     scene.remove(r);
