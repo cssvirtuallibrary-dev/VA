@@ -73,25 +73,25 @@
             <button id="ui-toggle-btn">▲</button>
         </div>
         <div id="ui-content">
-            <p>Siddham Heart Chakra meditation — auto-looping A01–A06 with concentric golden pulse waves from center core.</p>
+            <p>Siddham Heart Chakra meditation — auto-looping A01–A06 with concentric golden pulse waves radiating from the Heart Chakra.</p>
 
             <div class="control-group">
                 <label>Display Duration (s / node)</label>
-                <!-- ✦ Changed default: 3.5 → 7.0 (7 sec character delay) -->
-                <input type="range" id="interval-speed" min="1.5" max="12.0" step="0.5" value="7.0">
-                <span class="range-val" id="interval-label">7.0 s / node</span>
+                <!-- ✦ Default: 8.0 -->
+                <input type="range" id="interval-speed" min="1.5" max="12.0" step="0.5" value="8.0">
+                <span class="range-val" id="interval-label">8.0 s / node</span>
             </div>
 
             <div class="control-group">
                 <label>Ripple Expansion Speed</label>
-                <!-- ✦ Changed default: 0.9 → 1.6 -->
-                <input type="range" id="ripple-speed" min="0.3" max="2.5" step="0.1" value="1.6">
-                <span class="range-val" id="ripple-label">1.6</span>
+                <!-- ✦ Default: 0.5 -->
+                <input type="range" id="ripple-speed" min="0.1" max="2.5" step="0.1" value="0.5">
+                <span class="range-val" id="ripple-label">0.5</span>
             </div>
 
             <div class="control-group">
                 <label>Auto-Rotation (RPM)</label>
-                <!-- ✦ Changed default: 0 → 1 -->
+                <!-- ✦ Default: 1 -->
                 <input type="range" id="rotation-speed" min="0" max="10" step="0.1" value="1">
             </div>
 
@@ -147,16 +147,23 @@
         ];
 
         // =========================================================================
+        // Heart Chakra origin — single source of truth used by both nodes & ripples
+        // ✦ All A-node positions unified here. Ripple origin also derives from here.
+        // =========================================================================
+        const HEART_CHAKRA = new THREE.Vector3(0.0, 0.2, 0.0);
+
+        // =========================================================================
         // VA Viên Mãn — animation nodes A01–A06
+        // ✦ All excelPos set to Heart Chakra (0.0, 0.2, 0.0)
         // A03 → 03_VAM_Gold.PNG  |  A04 → 04_VU_Gold.PNG
         // =========================================================================
         const animationNodes = [
-            { id:"A01", name:"Heart Chakra",          excelPos:[0.0, 0.2,  0.0], chakra:"4 - Heart Chakra", image:"01_VA_Gold.PNG",    char:"𑖪",        phonetic:"Va",         series:"VA Viên Mãn" },
-            { id:"A02", name:"Heart Chakra",          excelPos:[0.0, 0.2,  0.0], chakra:"5 - Heart Chakra", image:"02_VAA_Gold.PNG",   char:"𑖪𑖯",       phonetic:"Vā",         series:"VA Viên Mãn" },
-            { id:"A03", name:"Front of Heart Chakra", excelPos:[0.0, 0.2, -0.2], chakra:"N/A",              image:"03_VAM_Gold.PNG",   char:"𑖪𑖼",       phonetic:"Vam",        series:"VA Viên Mãn" },
-            { id:"A04", name:"Heart Chakra",          excelPos:[0.0, 0.2,  0.0], chakra:"5 - Heart Chakra", image:"04_VU_Gold.PNG",    char:"𑖪𑖲",       phonetic:"Vu",         series:"VA Viên Mãn" },
-            { id:"A05", name:"Heart Chakra",          excelPos:[0.0, 0.2,  0.0], chakra:"6 - Heart Chakra", image:"05_VAH_Gold.PNG",   char:"𑖪𑖾",       phonetic:"Vah",        series:"VA Viên Mãn" },
-            { id:"A06", name:"Heart Chakra",          excelPos:[0.0, 0.2,  0.0], chakra:"7 - Heart Chakra", image:"06_VAvm2_Gold.PNG", char:"𑖪𑖲𑖯𑖼𑖾", phonetic:"VA Perfect", series:"VA Viên Mãn" }
+            { id:"A01", name:"Heart Chakra", excelPos:[0.0, 0.2, 0.0], chakra:"4 - Heart Chakra", image:"01_VA_Gold.PNG",    char:"𑖪",        phonetic:"Va",         series:"VA Viên Mãn" },
+            { id:"A02", name:"Heart Chakra", excelPos:[0.0, 0.2, 0.0], chakra:"5 - Heart Chakra", image:"02_VAA_Gold.PNG",   char:"𑖪𑖯",       phonetic:"Vā",         series:"VA Viên Mãn" },
+            { id:"A03", name:"Heart Chakra", excelPos:[0.0, 0.2, 0.0], chakra:"4 - Heart Chakra", image:"03_VAM_Gold.PNG",   char:"𑖪𑖼",       phonetic:"Vam",        series:"VA Viên Mãn" },
+            { id:"A04", name:"Heart Chakra", excelPos:[0.0, 0.2, 0.0], chakra:"5 - Heart Chakra", image:"04_VU_Gold.PNG",    char:"𑖪𑖲",       phonetic:"Vu",         series:"VA Viên Mãn" },
+            { id:"A05", name:"Heart Chakra", excelPos:[0.0, 0.2, 0.0], chakra:"6 - Heart Chakra", image:"05_VAH_Gold.PNG",   char:"𑖪𑖾",       phonetic:"Vah",        series:"VA Viên Mãn" },
+            { id:"A06", name:"Heart Chakra", excelPos:[0.0, 0.2, 0.0], chakra:"7 - Heart Chakra", image:"06_VAvm2_Gold.PNG", char:"𑖪𑖲𑖯𑖼𑖾", phonetic:"VA Perfect", series:"VA Viên Mãn" }
         ];
 
         // =========================================================================
@@ -183,7 +190,7 @@
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
 
-        // ✦ Lowered viewing angle: Y reduced from 3.5 → 1.8, distance kept natural
+        // Lowered viewing angle (Y = 1.8)
         const initialCameraPos = new THREE.Vector3(4.53, 1.8, -2.11);
         initialCameraPos.applyAxisAngle(new THREE.Vector3(0, 1, 0), 40 * Math.PI / 180);
         camera.position.copy(initialCameraPos);
@@ -236,22 +243,34 @@
         const rimLight = new THREE.DirectionalLight(0xffffff, 1.5);
         rimLight.position.set(0, -5, 0); scene.add(rimLight);
 
+        // Blue core at world origin
         const coreLight = new THREE.PointLight(0x00aaff, 2.0, 5);
         coreLight.position.set(0, 0, 0); scene.add(coreLight);
 
-        const heartLight = new THREE.PointLight(0xaa00ff, 0.0, 4.5);
-        heartLight.position.set(0, 0.2, 0); scene.add(heartLight);
+        // ✦ Heart Chakra accent light — fixed at HEART_CHAKRA, always on softly
+        const heartLight = new THREE.PointLight(0xaa00ff, 0.6, 4.5);
+        heartLight.position.copy(HEART_CHAKRA); scene.add(heartLight);
 
+        // ✦ Golden pulse flash — also placed at HEART_CHAKRA
         const goldenCore = new THREE.PointLight(0xffd700, 0.0, 9.0);
-        goldenCore.position.set(0, 0, 0); scene.add(goldenCore);
+        goldenCore.position.copy(HEART_CHAKRA); scene.add(goldenCore);
 
         // =========================================================================
         // Materials
         // =========================================================================
-        const privacyBlueGlass = new THREE.MeshPhysicalMaterial({
-            color: 0x88ddff, emissive: 0x0044aa, emissiveIntensity: 0.4,
-            roughness: 0.5, metalness: 0.1, transmission: 0.75, ior: 1.5, thickness: 1.8,
-            transparent: true, opacity: 1.0, side: THREE.DoubleSide, depthWrite: false
+        const privacyGreenJade = new THREE.MeshPhysicalMaterial({
+            color:             0x1a5c38,   // ✦ dark jade green (was 0x88ddff blue)
+            emissive:          0x0a2e1a,   // ✦ deep jade emissive (was 0x0044aa)
+            emissiveIntensity: 0.25,       // ✦ subtler glow suits jade (was 0.4)
+            roughness:         0.35,       // ✦ slight surface texture for jade feel (was 0.5)
+            metalness:         0.08,
+            transmission:      0.50,       // ✦ 50 % transparency (was 0.75)
+            ior:               1.62,       // ✦ jade refractive index ~1.60–1.65 (was 1.5)
+            thickness:         2.2,        // ✦ slightly thicker for richer colour depth (was 1.8)
+            transparent:       true,
+            opacity:           1.0,
+            side:              THREE.DoubleSide,
+            depthWrite:        false
         });
 
         const clearBubbleGlass = new THREE.MeshPhysicalMaterial({
@@ -283,7 +302,7 @@
             (gltf) => {
                 const m = gltf.scene;
                 m.traverse((node) => {
-                    if (node.isMesh) { node.material = privacyBlueGlass; node.castShadow = true; node.receiveShadow = true; }
+                    if (node.isMesh) { node.material = privacyGreenJade; node.castShadow = true; node.receiveShadow = true; }
                 });
                 m.scale.set(1.4, 1.4, 1.4);
                 m.position.set(0.0, -0.5, -0.18);
@@ -297,11 +316,11 @@
             (err) => {
                 console.warn("Procedural fallback.", err);
                 const fg = new THREE.Group();
-                const head  = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), privacyBlueGlass);
+                const head  = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), privacyGreenJade);
                 head.position.y = 0.55; fg.add(head);
-                const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.28, 0.65, 32), privacyBlueGlass);
+                const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.28, 0.65, 32), privacyGreenJade);
                 torso.position.y = 0.1; fg.add(torso);
-                const legs  = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.12, 16, 100), privacyBlueGlass);
+                const legs  = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.12, 16, 100), privacyGreenJade);
                 legs.rotation.x = Math.PI / 2; legs.position.y = -0.25; fg.add(legs);
                 fg.position.set(0.0, -0.5, -0.18); fg.rotation.y = Math.PI / 2;
                 buddhaGroup.add(fg);
@@ -334,7 +353,7 @@
         createAxisLabel("-Z",  0,    0,   -3.2);
 
         // =========================================================================
-        // Node spheres & glyph planes
+        // Node spheres & glyph planes — all at HEART_CHAKRA
         // =========================================================================
         const NODE_SPHERE_GEO = new THREE.SphereGeometry(0.20, 32, 32);
         const NODE_PLANE_GEO  = new THREE.PlaneGeometry(0.26, 0.26);
@@ -357,7 +376,8 @@
         }
 
         animationNodes.forEach((data) => {
-            const pos = new THREE.Vector3(data.excelPos[0], data.excelPos[1], data.excelPos[2]);
+            // ✦ All nodes positioned at HEART_CHAKRA
+            const pos = HEART_CHAKRA.clone();
 
             const sphereMat = new THREE.MeshPhysicalMaterial({
                 color: new THREE.Color(0x7700bb), emissive: new THREE.Color(0xaa00ff),
@@ -398,25 +418,29 @@
 
         // =========================================================================
         // CONCENTRIC PULSE RIPPLE SYSTEM
+        // ✦ All ripple shells are positioned at HEART_CHAKRA and expand outward
+        //   from that point in all directions (spherically symmetric).
         // =========================================================================
-        const RIPPLE_GEO     = new THREE.SphereGeometry(1.0, 72, 36);
-        const PULSE_PERIOD   = 1.6;
-        const RINGS_PER_PULSE = 3;
-        const RING_STAGGER   = 0.16;
-        const RING_DURATION  = 5.5;
-        const RING_MAX_RADIUS = 3.8;
+        const RIPPLE_GEO      = new THREE.SphereGeometry(1.0, 72, 36);
+        const PULSE_PERIOD    = 1.6;       // seconds between heartbeat pulses
+        const RINGS_PER_PULSE = 3;         // tight cluster of 3 shells per pulse
+        const RING_STAGGER    = 0.16;      // seconds between shells within a pulse
+        const RING_DURATION   = 5.5;       // shell lifetime at speed = 1.0
+        const RING_MAX_RADIUS = 3.8;       // world-unit radius at full expansion
 
+        // Leading ring brightest, trailing rings progressively dimmer
         const PULSE_RINGS = [
-            { peakOpacity: 0.13, colorHex: 0xffd700 },
-            { peakOpacity: 0.09, colorHex: 0xffcc33 },
-            { peakOpacity: 0.06, colorHex: 0xffe57a },
+            { peakOpacity: 0.13, colorHex: 0xffd700 },  // gold
+            { peakOpacity: 0.09, colorHex: 0xffcc33 },  // amber
+            { peakOpacity: 0.06, colorHex: 0xffe57a },  // pale gold
         ];
 
-        const activeRipples  = [];
-        const pendingSpawns  = [];
-        let   pulseTimer     = 0;
-        let   goldenFlash    = 0;
+        const activeRipples = [];
+        const pendingSpawns = [];
+        let   pulseTimer    = 0;
+        let   goldenFlash   = 0;
 
+        // Asymmetric envelope: sharp crest at leading edge, long exponential tail
         function rippleOpacity(t, peak) {
             const riseT = 0.08;
             if (t < riseT) return peak * (t / riseT);
@@ -430,6 +454,9 @@
                 side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending
             });
             const mesh = new THREE.Mesh(RIPPLE_GEO, mat);
+
+            // ✦ Ripple originates at Heart Chakra position, not world origin
+            mesh.position.copy(HEART_CHAKRA);
             mesh.scale.setScalar(0.001);
             mesh.userData = { age: 0, peakOpacity: ringDef.peakOpacity };
             scene.add(mesh);
@@ -470,7 +497,7 @@
             isRunning    = true;
             currentIndex = 0;
             seqTimer     = 0;
-            pulseTimer   = PULSE_PERIOD;
+            pulseTimer   = PULSE_PERIOD; // fire first pulse immediately
             showNode(0);
         }
 
@@ -505,11 +532,14 @@
             const glowVal     = parseFloat(glowIntensityInput.value);
             const rippleSpd   = Math.max(0.1, parseFloat(rippleSpeedInput.value));
 
-            // Core blue pulse
+            // Blue core pulse at world origin
             coreLight.intensity  = (Math.sin(elapsedTime * 2.0) * 0.4 + 1.2) * glowVal;
             coreLight.position.y = Math.sin(elapsedTime * 0.6) * 0.5;
 
-            // Golden core flash decay
+            // ✦ Heart accent light breathes gently — always centred at Heart Chakra
+            heartLight.intensity = (Math.sin(elapsedTime * 1.4) * 0.2 + 0.7) * glowVal;
+
+            // Golden flash at Heart Chakra — spike on pulse, exponential decay
             goldenFlash = Math.max(0, goldenFlash - delta * 3.5);
             goldenCore.intensity = goldenFlash * 2.8 * glowVal;
 
@@ -524,7 +554,7 @@
                 }
             }
 
-            // Active node animate
+            // Active node — sphere pulse & glyph billboard
             if (isRunning && currentIndex >= 0) {
                 const d = animationNodes[currentIndex];
 
@@ -535,26 +565,23 @@
                     d.sphereMesh.scale.setScalar(fadeIn * pulse);
                     d.sphereMesh.material.emissiveIntensity =
                         fadeIn * (0.75 + Math.sin(elapsedTime * 3.2) * 0.25) * glowVal;
-                    heartLight.position.set(d.excelPos[0], d.excelPos[1], d.excelPos[2]);
-                    heartLight.intensity = fadeIn * (0.9 + Math.sin(elapsedTime * 3.2) * 0.35) * glowVal;
                 }
 
+                // Glyph: gentle float + always face camera
                 if (d.planeMesh && d.planeMesh.visible) {
-                    d.planeMesh.position.y = d.excelPos[1] + Math.sin(elapsedTime * 1.9) * 0.015;
+                    d.planeMesh.position.y = HEART_CHAKRA.y + Math.sin(elapsedTime * 1.9) * 0.015;
                     d.planeMesh.quaternion.copy(camera.quaternion);
                 }
-            } else {
-                heartLight.intensity = 0.0;
             }
 
-            // Pulse heartbeat
+            // Pulse heartbeat timer
             pulseTimer += delta;
             if (pulseTimer >= PULSE_PERIOD) {
                 pulseTimer -= PULSE_PERIOD;
                 triggerPulse();
             }
 
-            // Resolve staggered spawns
+            // Resolve staggered ring spawns
             for (let i = pendingSpawns.length - 1; i >= 0; i--) {
                 pendingSpawns[i].countdown -= delta;
                 if (pendingSpawns[i].countdown <= 0) {
@@ -563,12 +590,13 @@
                 }
             }
 
-            // Ripple shell update
+            // ✦ Ripple shell update — each shell centered at HEART_CHAKRA
             const effectiveDuration = RING_DURATION / rippleSpd;
             for (let i = activeRipples.length - 1; i >= 0; i--) {
                 const r = activeRipples[i];
                 r.userData.age += delta;
                 const t = Math.min(r.userData.age / effectiveDuration, 1.0);
+                // Scale drives radius; position stays locked at HEART_CHAKRA (set at spawn)
                 r.scale.setScalar(Math.max(0.001, t * RING_MAX_RADIUS));
                 r.material.opacity = rippleOpacity(t, r.userData.peakOpacity) * glowVal;
                 if (t >= 1.0) {
@@ -578,7 +606,7 @@
                 }
             }
 
-            // ✦ Auto-rotation at 1 RPM default
+            // Auto-rotation — Buddha group only, axis labels stay fixed
             const rpm = parseFloat(rotationSpeedInput.value);
             buddhaGroup.rotation.y += ((rpm * Math.PI * 2) / 60) * delta;
 
