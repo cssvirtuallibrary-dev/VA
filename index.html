@@ -23,7 +23,7 @@
         #ui-header { display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
         h1 { font-size:14px; margin:0; color:#ffd700; text-transform:uppercase; letter-spacing:1px; font-weight:600; }
         #ui-toggle-btn { background:none; border:none; color:#ffd700; font-size:12px; cursor:pointer; padding:4px; transition:transform 0.3s ease; }
-        #ui-content { margin-top:12px; transition:max-height 0.35s ease, opacity 0.35s ease; max-height:280px; opacity:1; overflow:hidden; }
+        #ui-content { margin-top:12px; transition:max-height 0.35s ease, opacity 0.35s ease; max-height:300px; opacity:1; overflow:hidden; }
         #ui-container.collapsed { width:200px; }
         #ui-container.collapsed #ui-toggle-btn { transform:rotate(-90deg); }
         #ui-container.collapsed #ui-content { max-height:0; opacity:0; margin-top:0; pointer-events:none; }
@@ -73,7 +73,7 @@
             <button id="ui-toggle-btn">▲</button>
         </div>
         <div id="ui-content">
-            <p>Siddham Heart Chakra meditation — auto-looping A01–A06 with continuous golden ripple wave emanating from center.</p>
+            <p>Siddham Heart Chakra meditation — auto-looping A01–A06 with concentric golden ripple spheres emanating from center.</p>
 
             <div class="control-group">
                 <label>Display Duration (s / node)</label>
@@ -82,9 +82,9 @@
             </div>
 
             <div class="control-group">
-                <label>Ripple Speed</label>
-                <input type="range" id="ripple-speed" min="0.5" max="4.0" step="0.1" value="1.8">
-                <span class="range-val" id="ripple-label">1.8</span>
+                <label>Ripple Expansion Speed</label>
+                <input type="range" id="ripple-speed" min="0.3" max="3.0" step="0.1" value="1.2">
+                <span class="range-val" id="ripple-label">1.2</span>
             </div>
 
             <div class="control-group">
@@ -145,7 +145,7 @@
 
         // =========================================================================
         // VA Viên Mãn — animation nodes A01–A06
-        // A03 → 03_VAM_Gold.PNG | A04 → 04_VU_Gold.PNG
+        // A03 → 03_VAM_Gold.PNG  |  A04 → 04_VU_Gold.PNG
         // =========================================================================
         const animationNodes = [
             { id:"A01", name:"Heart Chakra",          excelPos:[0.0, 0.2,  0.0], chakra:"4 - Heart Chakra", image:"01_VA_Gold.PNG",    char:"𑖪",        phonetic:"Va",         series:"VA Viên Mãn" },
@@ -231,16 +231,14 @@
         const rimLight = new THREE.DirectionalLight(0xffffff, 1.5);
         rimLight.position.set(0, -5, 0); scene.add(rimLight);
 
-        // Pulsing core blue point light
         const coreLight = new THREE.PointLight(0x00aaff, 2.0, 5);
         coreLight.position.set(0, 0, 0); scene.add(coreLight);
 
-        // Purple heart-chakra accent — follows active node
         const heartLight = new THREE.PointLight(0xaa00ff, 0.0, 4.5);
         heartLight.position.set(0, 0.2, 0); scene.add(heartLight);
 
-        // Soft continuous golden ambient — breathes gently with ripple activity
-        const goldenAmbient = new THREE.PointLight(0xffd700, 0.6, 8.0);
+        // Soft golden ambient that breathes with the ripple field
+        const goldenAmbient = new THREE.PointLight(0xffd700, 0.5, 10.0);
         goldenAmbient.position.set(0, 0, 0); scene.add(goldenAmbient);
 
         // =========================================================================
@@ -272,36 +270,28 @@
 
         function onModelReady() {
             loadingOverlay.style.opacity = 0;
-            setTimeout(() => {
-                loadingOverlay.style.display = 'none';
-                startLoop();
-            }, 650);
+            setTimeout(() => { loadingOverlay.style.display = 'none'; startLoop(); }, 650);
         }
 
         const loader = new THREE.GLTFLoader();
         loader.load(
             'glass+buddha+statue+3d+model.glb',
             (gltf) => {
-                const buddhaMesh = gltf.scene;
-                buddhaMesh.traverse((node) => {
-                    if (node.isMesh) {
-                        node.material = privacyBlueGlass;
-                        node.castShadow = true; node.receiveShadow = true;
-                    }
+                const m = gltf.scene;
+                m.traverse((node) => {
+                    if (node.isMesh) { node.material = privacyBlueGlass; node.castShadow = true; node.receiveShadow = true; }
                 });
-                buddhaMesh.scale.set(1.4, 1.4, 1.4);
-                buddhaMesh.position.set(0.0, -0.5, -0.18);
-                buddhaMesh.rotation.y = Math.PI / 2;
-                buddhaGroup.add(buddhaMesh);
+                m.scale.set(1.4, 1.4, 1.4);
+                m.position.set(0.0, -0.5, -0.18);
+                m.rotation.y = Math.PI / 2;
+                buddhaGroup.add(m);
                 onModelReady();
             },
             (xhr) => {
-                if (xhr.total > 0) {
-                    loadingText.innerText = `Loading Buddha Model (${Math.round((xhr.loaded / xhr.total) * 100)}%)`;
-                }
+                if (xhr.total > 0) loadingText.innerText = `Loading (${Math.round((xhr.loaded / xhr.total) * 100)}%)`;
             },
             (err) => {
-                console.warn("Procedural fallback active.", err);
+                console.warn("Procedural fallback.", err);
                 const fg = new THREE.Group();
                 const head  = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), privacyBlueGlass);
                 head.position.y = 0.55; fg.add(head);
@@ -309,15 +299,14 @@
                 torso.position.y = 0.1; fg.add(torso);
                 const legs  = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.12, 16, 100), privacyBlueGlass);
                 legs.rotation.x = Math.PI / 2; legs.position.y = -0.25; fg.add(legs);
-                fg.position.set(0.0, -0.5, -0.18);
-                fg.rotation.y = Math.PI / 2;
+                fg.position.set(0.0, -0.5, -0.18); fg.rotation.y = Math.PI / 2;
                 buddhaGroup.add(fg);
                 onModelReady();
             }
         );
 
         // =========================================================================
-        // Axis labels (coordinate naming preserved)
+        // Axis labels
         // =========================================================================
         function createAxisLabel(text, x, y, z) {
             const canvas = document.createElement('canvas');
@@ -328,9 +317,7 @@
             ctx.fillStyle = '#ffd700'; ctx.font = 'bold 36px sans-serif';
             ctx.shadowColor = '#ffaa00'; ctx.shadowBlur = 10;
             ctx.fillText(text, 64, 64);
-            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
-                map: new THREE.CanvasTexture(canvas), transparent: true
-            }));
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true }));
             sprite.position.set(x, y, z);
             sprite.scale.set(0.6, 0.6, 1.0);
             scene.add(sprite);
@@ -343,8 +330,8 @@
         createAxisLabel("-Z",  0,    0,   -3.2);
 
         // =========================================================================
-        // Node sphere & glyph plane creation
-        // Purple sphere radius 0.20 (size 1.0) — plane 0.26×0.26 fully contained
+        // Node spheres & glyph planes
+        // Purple sphere radius 0.20 (size 1.0) — plane 0.26×0.26 fully inside
         // =========================================================================
         const NODE_SPHERE_GEO = new THREE.SphereGeometry(0.20, 32, 32);
         const NODE_PLANE_GEO  = new THREE.PlaneGeometry(0.26, 0.26);
@@ -370,20 +357,11 @@
             const pos = new THREE.Vector3(data.excelPos[0], data.excelPos[1], data.excelPos[2]);
 
             const sphereMat = new THREE.MeshPhysicalMaterial({
-                color:             new THREE.Color(0x7700bb),
-                emissive:          new THREE.Color(0xaa00ff),
-                emissiveIntensity: 0.0,
-                roughness:   0.08,
-                metalness:   0.0,
-                transmission: 0.50,
-                ior:          1.45,
-                thickness:    0.45,
-                transparent:  true,
-                opacity:      0.92,
-                side:         THREE.DoubleSide,
-                depthWrite:   false
+                color: new THREE.Color(0x7700bb), emissive: new THREE.Color(0xaa00ff),
+                emissiveIntensity: 0.0, roughness: 0.08, metalness: 0.0,
+                transmission: 0.50, ior: 1.45, thickness: 0.45,
+                transparent: true, opacity: 0.92, side: THREE.DoubleSide, depthWrite: false
             });
-
             const sphere = new THREE.Mesh(NODE_SPHERE_GEO, sphereMat);
             sphere.position.copy(pos);
             sphere.visible = false;
@@ -392,13 +370,10 @@
             data.sphereMesh = sphere;
 
             const glyphMat = new THREE.MeshBasicMaterial({
-                map:         createFallbackGlyphTexture(data.char, data.phonetic),
-                transparent: true,
-                side:        THREE.DoubleSide,
-                depthWrite:  false,
-                blending:    THREE.AdditiveBlending
+                map: createFallbackGlyphTexture(data.char, data.phonetic),
+                transparent: true, side: THREE.DoubleSide, depthWrite: false,
+                blending: THREE.AdditiveBlending
             });
-
             const plane = new THREE.Mesh(NODE_PLANE_GEO, glyphMat);
             plane.position.copy(pos);
             plane.visible = false;
@@ -419,83 +394,96 @@
         });
 
         // =========================================================================
-        // WATER RIPPLE SYSTEM
+        // 3-D BALLOON RIPPLE SYSTEM
         //
-        // Geometry: THREE.RingGeometry — thin flat ring, like a surface ripple.
-        // Three perpendicular planes (XZ horizontal + XY + YZ vertical) spawn
-        // simultaneously so the ripple reads as emanating "in all directions".
+        // Each ripple is a pair of concentric sphere shells (inner + outer) rendered
+        // with DoubleSide + AdditiveBlending.  The two shells travel together,
+        // separated by a fixed gap in radius, giving a thin "membrane" appearance
+        // that reads as a single volumetric wave-front — like a soap-bubble balloon
+        // expanding outward in all directions simultaneously.
         //
-        // Rings spawn continuously every SPAWN_INTERVAL seconds.
-        // Each ring lives for RING_DURATION seconds, expanding from the origin
-        // outward.  Opacity uses a smooth bell curve (peaks near t=0.15, gone by t=1)
-        // to mimic the bright crest of a water wave followed by a gentle fade.
+        // Opacity envelope:  flattened sine bell  sin(t·π)^0.30
+        //   – exponent < 0.5 gives a very wide, flat plateau (gentle long wavelength)
+        //   – rises quickly from 0, holds near-peak for most of the journey, fades out
+        //
+        // Three colour tones cycle per wave to create subtle shimmer depth.
+        //
+        // Spawn interval scales with user "Ripple Expansion Speed" so faster speed
+        // keeps the same visual density of concentric waves on screen.
         // =========================================================================
 
-        // Thin ring: inner/outer ratio ~0.90 for a crisp water-ripple line
-        const RING_GEO_THIN   = new THREE.RingGeometry(0.90, 1.00, 96);
-        const RING_GEO_MED    = new THREE.RingGeometry(0.82, 1.00, 96); // slightly wider secondary ring
-        const RING_MAX_RADIUS = 4.2;   // how far rings expand (world units)
-        const RING_DURATION   = 2.2;   // seconds per ring lifetime
-        const SPAWN_INTERVAL  = 0.22;  // seconds between wave launches
+        // Shared geometry — two shells per wave (inner / outer membrane)
+        // High segment count → perfectly smooth sphere silhouette
+        const SHELL_GEO_OUTER = new THREE.SphereGeometry(1.000, 80, 40);
+        const SHELL_GEO_INNER = new THREE.SphereGeometry(0.930, 80, 40); // 7 % narrower → thin membrane gap
 
-        // Each "wave launch" creates 3 rings (one per axis plane) with a colour
-        // that oscillates slightly between warm gold and amber for depth.
-        const RING_COLORS = [0xffd700, 0xffb300, 0xffe066];
+        const RIPPLE_MAX_RADIUS  = 4.5;   // world-units at full expansion
+        const RIPPLE_DURATION    = 3.2;   // seconds — slow, languid balloon travel
+        const BASE_SPAWN_INTERVAL = 0.55; // seconds between wave launches at speed = 1.0
 
-        const activeRipples   = [];   // live ring meshes
+        // Warm gold palette — rotates per wave
+        const WAVE_PALETTE = [
+            { hex: 0xffd700, peak: 0.30 },  // classic gold
+            { hex: 0xffcc22, peak: 0.24 },  // amber gold
+            { hex: 0xffe57a, peak: 0.20 },  // pale gold
+            { hex: 0xffb347, peak: 0.22 },  // warm amber
+        ];
+
+        const activeRipples  = [];
         let   rippleSpawnTimer = 0;
-        let   rippleWaveCount  = 0;   // used to cycle colours
+        let   rippleWaveIndex  = 0;
 
-        // Three quaternions — one per orthogonal plane
-        const PLANE_QUATS = (() => {
-            // RingGeometry lies in the XY plane by default.
-            // XZ horizontal: rotate -90° around X
-            const qXZ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), -Math.PI/2);
-            // XY vertical: identity (default)
-            const qXY = new THREE.Quaternion();
-            // YZ vertical: rotate 90° around Y
-            const qYZ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), Math.PI/2);
-            return [qXZ, qXY, qYZ];
-        })();
+        // Flat bell opacity curve: sin(t·π)^exponent
+        // exponent 0.28 → very broad plateau, gentle wavelength
+        function flatBell(t, peak, exponent = 0.28) {
+            return peak * Math.pow(Math.sin(t * Math.PI), exponent);
+        }
 
-        function spawnRippleWave() {
-            const colorHex  = RING_COLORS[rippleWaveCount % RING_COLORS.length];
-            rippleWaveCount++;
+        function spawnBalloonWave() {
+            const palette = WAVE_PALETTE[rippleWaveIndex % WAVE_PALETTE.length];
+            rippleWaveIndex++;
 
-            // Horizontal ring (XZ) is the "hero" water ripple — full opacity crest
-            // Vertical rings are subtler — roughly half opacity
-            const configs = [
-                { quat: PLANE_QUATS[0], geo: RING_GEO_THIN, peakOpacity: 0.72 }, // XZ horizontal
-                { quat: PLANE_QUATS[1], geo: RING_GEO_MED,  peakOpacity: 0.36 }, // XY vertical
-                { quat: PLANE_QUATS[2], geo: RING_GEO_MED,  peakOpacity: 0.36 }, // YZ vertical
-            ];
-
-            configs.forEach((cfg) => {
-                const mat = new THREE.MeshBasicMaterial({
-                    color:       colorHex,
-                    transparent: true,
-                    opacity:     0,
-                    side:        THREE.DoubleSide,
-                    depthWrite:  false,
-                    blending:    THREE.AdditiveBlending
-                });
-                const mesh = new THREE.Mesh(cfg.geo, mat);
-                mesh.quaternion.copy(cfg.quat);
-                mesh.scale.setScalar(0.001);          // start at origin, near-zero
-                mesh.userData.age         = 0;
-                mesh.userData.maxAge      = RING_DURATION;
-                mesh.userData.peakOpacity = cfg.peakOpacity;
-                scene.add(mesh);
-                activeRipples.push(mesh);
+            // Outer shell — the leading bright membrane
+            const matOuter = new THREE.MeshBasicMaterial({
+                color:       palette.hex,
+                transparent: true,
+                opacity:     0,
+                side:        THREE.DoubleSide,
+                depthWrite:  false,
+                blending:    THREE.AdditiveBlending
             });
+
+            // Inner shell — slightly dimmer trailing edge, creates membrane thickness
+            const matInner = new THREE.MeshBasicMaterial({
+                color:       palette.hex,
+                transparent: true,
+                opacity:     0,
+                side:        THREE.DoubleSide,
+                depthWrite:  false,
+                blending:    THREE.AdditiveBlending
+            });
+
+            const meshOuter = new THREE.Mesh(SHELL_GEO_OUTER, matOuter);
+            const meshInner = new THREE.Mesh(SHELL_GEO_INNER, matInner);
+
+            // Both shells start at origin, invisible
+            meshOuter.scale.setScalar(0.001);
+            meshInner.scale.setScalar(0.001);
+
+            meshOuter.userData = { age: 0, duration: RIPPLE_DURATION, peakOpacity: palette.peak, isOuter: true };
+            meshInner.userData = { age: 0, duration: RIPPLE_DURATION, peakOpacity: palette.peak * 0.55, isOuter: false };
+
+            scene.add(meshOuter);
+            scene.add(meshInner);
+            activeRipples.push(meshOuter, meshInner);
         }
 
         // =========================================================================
         // Sequencer
         // =========================================================================
-        let currentIndex  = -1;
-        let isRunning     = false;
-        let seqTimer      = 0;
+        let currentIndex = -1;
+        let isRunning    = false;
+        let seqTimer     = 0;
 
         function showNode(index) {
             animationNodes.forEach((d) => {
@@ -507,7 +495,6 @@
                 }
                 if (d.planeMesh) d.planeMesh.visible = false;
             });
-
             if (index < 0 || index >= animationNodes.length) return;
             const d = animationNodes[index];
             if (d.sphereMesh) d.sphereMesh.visible = true;
@@ -550,16 +537,16 @@
             const delta       = clock.getDelta();
             const elapsedTime = clock.getElapsedTime();
             const glowVal     = parseFloat(glowIntensityInput.value);
-            const rippleSpd   = parseFloat(rippleSpeedInput.value);  // expansion speed multiplier
+            const rippleSpd   = Math.max(0.1, parseFloat(rippleSpeedInput.value));
 
-            // --- Core pulsing blue light ---
+            // --- Core blue pulse ---
             coreLight.intensity  = (Math.sin(elapsedTime * 2.0) * 0.4 + 1.2) * glowVal;
             coreLight.position.y = Math.sin(elapsedTime * 0.6) * 0.5;
 
-            // --- Gentle golden ambient breathe ---
-            goldenAmbient.intensity = (Math.sin(elapsedTime * 1.3) * 0.2 + 0.5) * glowVal;
+            // --- Golden ambient breathes gently ---
+            goldenAmbient.intensity = (Math.sin(elapsedTime * 0.9) * 0.15 + 0.4) * glowVal;
 
-            // --- Sequencer tick ---
+            // --- Sequencer ---
             if (isRunning) {
                 seqTimer += delta;
                 const interval = parseFloat(intervalSpeedInput.value);
@@ -570,14 +557,13 @@
                 }
             }
 
-            // --- Animate active node sphere & glyph ---
+            // --- Active node animate ---
             if (isRunning && currentIndex >= 0) {
                 const d = animationNodes[currentIndex];
 
                 if (d.sphereMesh && d.sphereMesh.visible) {
                     d.sphereMesh.userData.nodeAge += delta;
-                    const age    = d.sphereMesh.userData.nodeAge;
-                    const fadeIn = Math.min(1.0, age * 4.0);
+                    const fadeIn = Math.min(1.0, d.sphereMesh.userData.nodeAge * 4.0);
                     const pulse  = 1.0 + Math.sin(elapsedTime * 3.2) * 0.10;
                     d.sphereMesh.scale.setScalar(fadeIn * pulse);
                     d.sphereMesh.material.emissiveIntensity =
@@ -596,38 +582,44 @@
             }
 
             // -----------------------------------------------------------------------
-            // WATER RIPPLE UPDATE
+            // BALLOON RIPPLE UPDATE
             //
-            // t goes 0 → 1 over RING_DURATION.
+            // effectiveDuration = RIPPLE_DURATION / rippleSpd
+            //   → faster slider = shorter life = same max radius reached faster
             //
-            // Scale:   linear expansion — ring radius = t × RING_MAX_RADIUS
-            //          but modulated by rippleSpd so the user can tune speed.
+            // Scale:   t × RIPPLE_MAX_RADIUS  (linear balloon expansion)
             //
-            // Opacity: bell-curve shape peaking at t≈0.12 (bright leading crest)
-            //          then decaying quadratically so the tail fades smoothly.
-            //          Formula: peak × 4t × (1-t)^2  — similar to a water wave crest.
+            // Opacity: flatBell(t, peak, 0.28)
+            //   The very low exponent (0.28) produces an extremely wide, flat-topped
+            //   bell.  This mimics the long-wavelength "swell" of a soap bubble or
+            //   slow pressure wave — bright across most of its travel, not just a
+            //   sharp crest, then gently dissolving at the far edge.
+            //
+            // Inner shell travels at 93 % of outer radius → persistent thin membrane
+            // appearance regardless of viewing angle.
             // -----------------------------------------------------------------------
             rippleSpawnTimer += delta;
-            const dynInterval = SPAWN_INTERVAL / Math.max(0.3, rippleSpd); // faster spawn = more rings visible
-            if (rippleSpawnTimer >= dynInterval) {
-                rippleSpawnTimer -= dynInterval;
-                spawnRippleWave();
+            const dynSpawnInterval = BASE_SPAWN_INTERVAL / rippleSpd;
+            if (rippleSpawnTimer >= dynSpawnInterval) {
+                rippleSpawnTimer -= dynSpawnInterval;
+                spawnBalloonWave();
             }
 
+            const effectiveDuration = RIPPLE_DURATION / rippleSpd;
+
             for (let i = activeRipples.length - 1; i >= 0; i--) {
-                const r   = activeRipples[i];
-                const dur = r.userData.maxAge / Math.max(0.3, rippleSpd); // speed-adjusted duration
+                const r = activeRipples[i];
                 r.userData.age += delta;
 
-                const t = Math.min(r.userData.age / dur, 1.0);
+                const t = Math.min(r.userData.age / effectiveDuration, 1.0);
 
-                // Scale: start tiny, expand to RING_MAX_RADIUS
-                r.scale.setScalar(Math.max(0.001, t * RING_MAX_RADIUS));
+                // Outer shell: full linear expansion
+                // Inner shell: 93 % of outer to keep membrane gap constant
+                const baseRadius = t * RIPPLE_MAX_RADIUS;
+                r.scale.setScalar(Math.max(0.001, r.userData.isOuter ? baseRadius : baseRadius * 0.93));
 
-                // Opacity: bell crest — bright at leading edge, quick fade
-                // 4t(1-t)^2 peaks at t=1/3 ≈ 0.15 max
-                const bell = 4.0 * t * Math.pow(1.0 - t, 2.0);
-                r.material.opacity = r.userData.peakOpacity * bell * glowVal;
+                // Flat bell opacity — plateau across most of the balloon's life
+                r.material.opacity = flatBell(t, r.userData.peakOpacity) * glowVal;
 
                 if (t >= 1.0) {
                     scene.remove(r);
