@@ -13,7 +13,6 @@
         }
         #canvas-container { width: 100vw; height: 100vh; display: block; }
 
-        /* Collapsible UI Control Panel */
         #ui-container {
             position: absolute; top: 15px; left: 15px;
             background: rgba(10, 15, 25, 0.85); padding: 14px 18px; border-radius: 14px;
@@ -98,43 +97,43 @@
         // =========================================================================
         const baseSphereData = [
             // --- Series: Thường Trụ Bất Biến ---
-            { id: "B01", name: "Forehead",              excelPos: [0.0,  0.8, -0.1], chakra: "6 - Third Eye Chakra",      char: "𑖀",     phonetic: "A",     series: "Thường Trụ Bất Biến", dharma: "Cintamani Jewel" },
-            { id: "B02", name: "Sacral Chakra",         excelPos: [0.0, -0.2,  0.0], chakra: "2 - Sacral Chakra",         char: "𑖢",     phonetic: "Pa",    series: "Thường Trụ Bất Biến", dharma: "Jewel Bowl" },
-            { id: "B03", name: "Front Center",          excelPos: [0.0,  0.0, -0.1], chakra: "N/A",                       char: "𑖨",     phonetic: "Ra",    series: "Thường Trụ Bất Biến", dharma: "Lariat Rope" },
-            { id: "B04", name: "Behind Center",         excelPos: [0.0,  0.0,  0.1], chakra: "N/A",                       char: "𑖜",     phonetic: "Nna",   series: "Thường Trụ Bất Biến", dharma: "Jewel Beads" },
-            { id: "B05", name: "Above Right Knee",      excelPos: [0.5,  0.0, -0.5], chakra: "N/A",                       char: "𑖬",     phonetic: "Ssa",   series: "Thường Trụ Bất Biến", dharma: "Jewel Bow" },
-            { id: "B06", name: "Above Left Knee",       excelPos: [-0.5, 0.0, -0.5], chakra: "N/A",                       char: "𑖪",     phonetic: "Va",    series: "Thường Trụ Bất Biến", dharma: "Jewel Arrow" },
+            { id: "B01", name: "Forehead",              excelPos: [0.0,  0.8, -0.1], chakra: "6 - Third Eye Chakra",    char: "𑖀",     phonetic: "A",     series: "Thường Trụ Bất Biến", dharma: "Cintamani Jewel" },
+            { id: "B02", name: "Sacral Chakra",         excelPos: [0.0, -0.2,  0.0], chakra: "2 - Sacral Chakra",       char: "𑖢",     phonetic: "Pa",    series: "Thường Trụ Bất Biến", dharma: "Jewel Bowl" },
+            { id: "B03", name: "Front Center",          excelPos: [0.0,  0.0, -0.1], chakra: "N/A",                     char: "𑖨",     phonetic: "Ra",    series: "Thường Trụ Bất Biến", dharma: "Lariat Rope" },
+            { id: "B04", name: "Behind Center",         excelPos: [0.0,  0.0,  0.1], chakra: "N/A",                     char: "𑖜",     phonetic: "Nna",   series: "Thường Trụ Bất Biến", dharma: "Jewel Beads" },
+            { id: "B05", name: "Above Right Knee",      excelPos: [0.5,  0.0, -0.5], chakra: "N/A",                     char: "𑖬",     phonetic: "Ssa",   series: "Thường Trụ Bất Biến", dharma: "Jewel Bow" },
+            { id: "B06", name: "Above Left Knee",       excelPos: [-0.5, 0.0, -0.5], chakra: "N/A",                     char: "𑖪",     phonetic: "Va",    series: "Thường Trụ Bất Biến", dharma: "Jewel Arrow" },
             // --- Series: Liên Hoa Bồ Đề Tâm ---
-            { id: "B07", name: "Bottom Outer",          excelPos: [0.0, -2.0,  0.0], chakra: "N/A",                       char: "𑖚",     phonetic: "Dda",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
-            { id: "B08", name: "Bottom Inner",          excelPos: [0.0, -1.0,  0.0], chakra: "N/A",                       char: "𑖧",     phonetic: "Ya",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Treasure Chest" },
-            { id: "B09", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra",   char: "𑖓",     phonetic: "Ca",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
-            { id: "B10", name: "Top Inner",             excelPos: [0.0,  1.0,  0.0], chakra: "7 - Crown Chakra",          char: "𑖭",     phonetic: "Sa",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sweet Dews" },
-            { id: "B11", name: "Top Outer",             excelPos: [0.0,  2.0,  0.0], chakra: "N/A",                       char: "𑖤",     phonetic: "Ba",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
-            { id: "B12", name: "Back Outer",            excelPos: [0.0,  0.0,  2.0], chakra: "N/A",                       char: "𑖚",     phonetic: "Dda",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
-            { id: "B13", name: "Back Inner",            excelPos: [0.0,  0.0,  1.0], chakra: "N/A",                       char: "𑖎𑖿𑖬", phonetic: "Kssa",  series: "Liên Hoa Bồ Đề Tâm",  dharma: "Red Lotus" },
-            { id: "B14", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra",   char: "𑖓",     phonetic: "Ca",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
-            { id: "B15", name: "Front Inner",           excelPos: [0.0,  0.0, -1.0], chakra: "N/A",                       char: "𑖐",     phonetic: "Ga",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "White Lotus" },
-            { id: "B16", name: "Front Outer",           excelPos: [0.0,  0.0, -2.0], chakra: "N/A",                       char: "𑖤",     phonetic: "Ba",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
-            { id: "B17", name: "Right Outer",           excelPos: [2.0,  0.0,  0.0], chakra: "N/A",                       char: "𑖚",     phonetic: "Dda",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
-            { id: "B18", name: "Right Inner",           excelPos: [1.0,  0.0,  0.0], chakra: "N/A",                       char: "𑖭𑖿𑖪", phonetic: "Sva",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Purple Lotus" },
-            { id: "B19", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra",   char: "𑖓",     phonetic: "Ca",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
-            { id: "B20", name: "Left Inner",            excelPos: [-1.0, 0.0,  0.0], chakra: "N/A",                       char: "𑖞",     phonetic: "Tha",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Blue Lotus" },
-            { id: "B21", name: "Left Outer",            excelPos: [-2.0, 0.0,  0.0], chakra: "N/A",                       char: "𑖤",     phonetic: "Ba",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
-            { id: "B22", name: "Heart Chakra",          excelPos: [0.0,  0.2,  0.0], chakra: "4 - Heart Chakra",          char: "𑖪",     phonetic: "Va",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Integral Lotus" },
-            { id: "B23", name: "Throat Chakra+",        excelPos: [0.0,  0.5, -0.1], chakra: "N/A",                       char: "𑖝𑖿𑖭", phonetic: "Tsa",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Axe" },
-            { id: "B24", name: "Throat Chakra",         excelPos: [0.0,  0.5,  0.0], chakra: "5 - Throat Chakra",         char: "𑖬𑖿𑖘", phonetic: "Sstta", series: "Liên Hoa Bồ Đề Tâm",  dharma: "Pure Vase" },
-            { id: "B25", name: "High Above Head",       excelPos: [0.0,  1.5,  0.0], chakra: "N/A",                       char: "𑖧𑖿𑖭", phonetic: "Ysa",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Transformation Buddha Atop The Crown" },
+            { id: "B07", name: "Bottom Outer",          excelPos: [0.0, -2.0,  0.0], chakra: "N/A",                     char: "𑖚",     phonetic: "Dda",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
+            { id: "B08", name: "Bottom Inner",          excelPos: [0.0, -1.0,  0.0], chakra: "N/A",                     char: "𑖧",     phonetic: "Ya",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Treasure Chest" },
+            { id: "B09", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra", char: "𑖓",     phonetic: "Ca",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
+            { id: "B10", name: "Top Inner",             excelPos: [0.0,  1.0,  0.0], chakra: "7 - Crown Chakra",        char: "𑖭",     phonetic: "Sa",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sweet Dews" },
+            { id: "B11", name: "Top Outer",             excelPos: [0.0,  2.0,  0.0], chakra: "N/A",                     char: "𑖤",     phonetic: "Ba",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
+            { id: "B12", name: "Back Outer",            excelPos: [0.0,  0.0,  2.0], chakra: "N/A",                     char: "𑖚",     phonetic: "Dda",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
+            { id: "B13", name: "Back Inner",            excelPos: [0.0,  0.0,  1.0], chakra: "N/A",                     char: "𑖎𑖿𑖬", phonetic: "Kssa",  series: "Liên Hoa Bồ Đề Tâm",  dharma: "Red Lotus" },
+            { id: "B14", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra", char: "𑖓",     phonetic: "Ca",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
+            { id: "B15", name: "Front Inner",           excelPos: [0.0,  0.0, -1.0], chakra: "N/A",                     char: "𑖐",     phonetic: "Ga",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "White Lotus" },
+            { id: "B16", name: "Front Outer",           excelPos: [0.0,  0.0, -2.0], chakra: "N/A",                     char: "𑖤",     phonetic: "Ba",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
+            { id: "B17", name: "Right Outer",           excelPos: [2.0,  0.0,  0.0], chakra: "N/A",                     char: "𑖚",     phonetic: "Dda",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Moon Essence Mani" },
+            { id: "B18", name: "Right Inner",           excelPos: [1.0,  0.0,  0.0], chakra: "N/A",                     char: "𑖭𑖿𑖪", phonetic: "Sva",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Purple Lotus" },
+            { id: "B19", name: "Center",                excelPos: [0.0,  0.0,  0.0], chakra: "3 - Solar Plexus Chakra", char: "𑖓",     phonetic: "Ca",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Sword" },
+            { id: "B20", name: "Left Inner",            excelPos: [-1.0, 0.0,  0.0], chakra: "N/A",                     char: "𑖞",     phonetic: "Tha",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Blue Lotus" },
+            { id: "B21", name: "Left Outer",            excelPos: [-2.0, 0.0,  0.0], chakra: "N/A",                     char: "𑖤",     phonetic: "Ba",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Sun Essence Mani" },
+            { id: "B22", name: "Heart Chakra",          excelPos: [0.0,  0.2,  0.0], chakra: "4 - Heart Chakra",        char: "𑖪",     phonetic: "Va",    series: "Liên Hoa Bồ Đề Tâm",  dharma: "Integral Lotus" },
+            { id: "B23", name: "Throat Chakra+",        excelPos: [0.0,  0.5, -0.1], chakra: "N/A",                     char: "𑖝𑖿𑖭", phonetic: "Tsa",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Jewel Axe" },
+            { id: "B24", name: "Throat Chakra",         excelPos: [0.0,  0.5,  0.0], chakra: "5 - Throat Chakra",       char: "𑖬𑖿𑖘", phonetic: "Sstta", series: "Liên Hoa Bồ Đề Tâm",  dharma: "Pure Vase" },
+            { id: "B25", name: "High Above Head",       excelPos: [0.0,  1.5,  0.0], chakra: "N/A",                     char: "𑖧𑖿𑖭", phonetic: "Ysa",   series: "Liên Hoa Bồ Đề Tâm",  dharma: "Transformation Buddha Atop The Crown" },
             // --- Series: Lục Tý ---
-            { id: "B26", name: "Joined Palm",           excelPos: [0.0,  0.2, -0.3], chakra: "N/A",                       char: "𑖑",     phonetic: "Gha",   series: "Lục Tý",              dharma: "Joined Palm" },
-            { id: "B27", name: "Lower Left Palm",       excelPos: [-0.2,-0.1, -0.3], chakra: "N/A",                       char: "𑖟",     phonetic: "Da",    series: "Lục Tý",              dharma: "Fearless Palm" },
-            { id: "B28", name: "Lower Right Palm",      excelPos: [0.2, -0.1, -0.3], chakra: "N/A",                       char: "𑖭",     phonetic: "Sa",    series: "Lục Tý",              dharma: "Sweet Dews" },
-            { id: "B29", name: "Upper Open Left Palm",  excelPos: [-0.5, 0.3, -0.5], chakra: "N/A",                       char: "𑖤",     phonetic: "Ba",    series: "Lục Tý",              dharma: "Sun Essence Mani" },
-            { id: "B30", name: "Upper Open Right Palm", excelPos: [0.5,  0.3, -0.5], chakra: "N/A",                       char: "𑖚",     phonetic: "Dda",   series: "Lục Tý",              dharma: "Moon Essence Mani" },
-            { id: "B31", name: "Meditation Mutra",      excelPos: [0.0, -0.1, -0.3], chakra: "N/A",                       char: "𑖛",     phonetic: "Ddha",  series: "Lục Tý",              dharma: "Thousand Hands & Eyes" },
+            { id: "B26", name: "Joined Palm",           excelPos: [0.0,  0.2, -0.3], chakra: "N/A",                     char: "𑖑",     phonetic: "Gha",   series: "Lục Tý",              dharma: "Joined Palm" },
+            { id: "B27", name: "Lower Left Palm",       excelPos: [-0.2,-0.1, -0.3], chakra: "N/A",                     char: "𑖟",     phonetic: "Da",    series: "Lục Tý",              dharma: "Fearless Palm" },
+            { id: "B28", name: "Lower Right Palm",      excelPos: [0.2, -0.1, -0.3], chakra: "N/A",                     char: "𑖭",     phonetic: "Sa",    series: "Lục Tý",              dharma: "Sweet Dews" },
+            { id: "B29", name: "Upper Open Left Palm",  excelPos: [-0.5, 0.3, -0.5], chakra: "N/A",                     char: "𑖤",     phonetic: "Ba",    series: "Lục Tý",              dharma: "Sun Essence Mani" },
+            { id: "B30", name: "Upper Open Right Palm", excelPos: [0.5,  0.3, -0.5], chakra: "N/A",                     char: "𑖚",     phonetic: "Dda",   series: "Lục Tý",              dharma: "Moon Essence Mani" },
+            { id: "B31", name: "Meditation Mutra",      excelPos: [0.0, -0.1, -0.3], chakra: "N/A",                     char: "𑖛",     phonetic: "Ddha",  series: "Lục Tý",              dharma: "Thousand Hands & Eyes" },
             // --- Series: Ending ---
-            { id: "B32", name: "Left Knee",             excelPos: [-0.5,-0.3, -0.4], chakra: "N/A",                       char: "𑖏",     phonetic: "Kha",   series: "Ending",              dharma: "Jewel Staff" },
-            { id: "B33", name: "Right Knee",            excelPos: [0.5, -0.3, -0.4], chakra: "N/A",                       char: "𑖀",     phonetic: "A",     series: "Ending",              dharma: "Cintamani Jewel" },
-            { id: "B34", name: "Center of Mandala",     excelPos: [0.0, -0.5,  0.0], chakra: "1 - Root Chakra",           char: "𑖣",     phonetic: "Pha",   series: "Ending",              dharma: "Non-retreating Dharma Wheel" }
+            { id: "B32", name: "Left Knee",             excelPos: [-0.5,-0.3, -0.4], chakra: "N/A",                     char: "𑖏",     phonetic: "Kha",   series: "Ending",              dharma: "Jewel Staff" },
+            { id: "B33", name: "Right Knee",            excelPos: [0.5, -0.3, -0.4], chakra: "N/A",                     char: "𑖀",     phonetic: "A",     series: "Ending",              dharma: "Cintamani Jewel" },
+            { id: "B34", name: "Center of Mandala",     excelPos: [0.0, -0.5,  0.0], chakra: "1 - Root Chakra",         char: "𑖣",     phonetic: "Pha",   series: "Ending",              dharma: "Non-retreating Dharma Wheel" }
         ];
 
         // =========================================================================
@@ -280,34 +279,8 @@
         );
 
         // =========================================================================
-        // Axial coordinate system — laser beams & labels (fixed in world space)
+        // Axis labels (coordinate naming preserved)
         // =========================================================================
-        function createAxialLaserBeam(direction) {
-            const beamGroup = new THREE.Group();
-            const totalLength = 2.3, coneHeight = 0.15;
-            const cylinderLength = totalLength - coneHeight;
-            const cylinderRadius = 0.019, coneRadius = cylinderRadius * 2.2;
-            const mat = new THREE.MeshBasicMaterial({
-                color: 0x00d2ff, transparent: true, opacity: 0.8,
-                blending: THREE.AdditiveBlending, side: THREE.DoubleSide
-            });
-            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(cylinderRadius, cylinderRadius, cylinderLength, 16), mat);
-            shaft.position.y = cylinderLength / 2; beamGroup.add(shaft);
-            const head = new THREE.Mesh(new THREE.ConeGeometry(coneRadius, coneHeight, 16), mat);
-            head.position.y = cylinderLength + (coneHeight / 2); beamGroup.add(head);
-            beamGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
-            return beamGroup;
-        }
-
-        [
-            new THREE.Vector3( 1,  0,  0),
-            new THREE.Vector3(-1,  0,  0),
-            new THREE.Vector3( 0,  1,  0),
-            new THREE.Vector3( 0, -1,  0),
-            new THREE.Vector3( 0,  0,  1),
-            new THREE.Vector3( 0,  0, -1)
-        ].forEach((dir) => scene.add(createAxialLaserBeam(dir)));
-
         function createAxisLabel(text, x, y, z) {
             const canvas = document.createElement('canvas');
             canvas.width = 128; canvas.height = 128;
@@ -358,7 +331,7 @@
             coreLight.intensity = (Math.sin(elapsedTime * 2) * 0.4 + 1.2) * glowVal;
             coreLight.position.y = Math.sin(elapsedTime * 0.6) * 0.5;
 
-            // Auto-rotation (Buddha only; coordinate axes remain fixed)
+            // Auto-rotation (Buddha only; axis labels remain fixed in world space)
             const rpm = parseFloat(rotationSpeedInput.value);
             const rotationStep = ((rpm * Math.PI * 2) / 60) * delta;
             buddhaGroup.rotation.y += rotationStep;
@@ -371,3 +344,4 @@
     </script>
 </body>
 </html>
+
