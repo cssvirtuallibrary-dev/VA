@@ -77,22 +77,22 @@
 
             <div class="control-group">
                 <label>Display Duration (s / node)</label>
-                <!-- ✦ Default: 8.0 -->
-                <input type="range" id="interval-speed" min="1.5" max="12.0" step="0.5" value="8.0">
-                <span class="range-val" id="interval-label">8.0 s / node</span>
+                <!-- ✦ Default updated to 12.0 -->
+                <input type="range" id="interval-speed" min="1.5" max="15.0" step="0.5" value="12.0">
+                <span class="range-val" id="interval-label">12.0 s / node</span>
             </div>
 
             <div class="control-group">
                 <label>Ripple Expansion Speed</label>
-                <!-- ✦ Default: 0.5 -->
-                <input type="range" id="ripple-speed" min="0.1" max="2.5" step="0.1" value="0.5">
-                <span class="range-val" id="ripple-label">0.5</span>
+                <!-- ✦ Default updated to 1.1 -->
+                <input type="range" id="ripple-speed" min="0.1" max="2.5" step="0.1" value="1.1">
+                <span class="range-val" id="ripple-label">1.1</span>
             </div>
 
             <div class="control-group">
                 <label>Auto-Rotation (RPM)</label>
-                <!-- ✦ Default: 1 -->
-                <input type="range" id="rotation-speed" min="0" max="10" step="0.1" value="1">
+                <!-- ✦ Default updated to 0.5 -->
+                <input type="range" id="rotation-speed" min="0" max="10" step="0.1" value="0.5">
             </div>
 
             <details>
@@ -148,14 +148,11 @@
 
         // =========================================================================
         // Heart Chakra origin — single source of truth used by both nodes & ripples
-        // ✦ All A-node positions unified here. Ripple origin also derives from here.
         // =========================================================================
         const HEART_CHAKRA = new THREE.Vector3(0.0, 0.2, 0.0);
 
         // =========================================================================
         // VA Viên Mãn — animation nodes A01–A06
-        // ✦ All excelPos set to Heart Chakra (0.0, 0.2, 0.0)
-        // A03 → 03_VAM_Gold.PNG  |  A04 → 04_VU_Gold.PNG
         // =========================================================================
         const animationNodes = [
             { id:"A01", name:"Heart Chakra", excelPos:[0.0, 0.2, 0.0], chakra:"4 - Heart Chakra", image:"01_VA_Gold.PNG",    char:"𑖪",        phonetic:"Va",         series:"VA Viên Mãn" },
@@ -247,30 +244,30 @@
         const coreLight = new THREE.PointLight(0x00aaff, 2.0, 5);
         coreLight.position.set(0, 0, 0); scene.add(coreLight);
 
-        // ✦ Heart Chakra accent light — fixed at HEART_CHAKRA, always on softly
+        // Heart Chakra accent light — fixed at HEART_CHAKRA, always on softly
         const heartLight = new THREE.PointLight(0xaa00ff, 0.6, 4.5);
         heartLight.position.copy(HEART_CHAKRA); scene.add(heartLight);
 
-        // ✦ Golden pulse flash — also placed at HEART_CHAKRA
+        // Golden pulse flash — also placed at HEART_CHAKRA
         const goldenCore = new THREE.PointLight(0xffd700, 0.0, 9.0);
         goldenCore.position.copy(HEART_CHAKRA); scene.add(goldenCore);
 
         // =========================================================================
-        // Materials
+        // Materials — Configured to allow interior views
         // =========================================================================
         const GreenJade = new THREE.MeshPhysicalMaterial({
             color:             0x1a5c38,   // dark jade green
             emissive:          0x0a2e1a,   // deep jade emissive
             emissiveIntensity: 0.25,
-            roughness:         0.35,
-            metalness:         0.08,
-            transmission:      0.5,        // ✦ fully solid — no transmission (was 0.50)
+            roughness:         0.25,       // polished jade
+            metalness:         0.1,
+            transmission:      0.75,       // ✦ Transmissive physical glass style
             ior:               1.62,
-            thickness:         0.0,        // ✦ irrelevant at 0 transmission, set to 0
-            transparent:       true,      // ✦ completely opaque (was true)
-            opacity:           1.0,
-            side:              THREE.FrontSide,  // ✦ FrontSide only for solid object (was DoubleSide)
-            depthWrite:        true        // ✦ solid objects write depth (was false)
+            thickness:         0.5,        // depth refraction
+            transparent:       true,       // ✦ Enabled transparency
+            opacity:           0.5,        // ✦ Lower opacity to see internal characters
+            side:              THREE.DoubleSide,
+            depthWrite:        false       // ✦ Prevents the jade statue shell from depth-blocking the interior node
         });
 
         const clearBubbleGlass = new THREE.MeshPhysicalMaterial({
@@ -372,7 +369,6 @@
             ctx.fillText(phonetic, 256, 395);
             const tex = new THREE.CanvasTexture(canvas);
             
-            // Version safe colorSpace assignment
             if (THREE.SRGBColorSpace) {
                 tex.colorSpace = THREE.SRGBColorSpace;
             } else if (THREE.sRGBEncoding) {
@@ -382,19 +378,18 @@
         }
 
         animationNodes.forEach((data) => {
-            // ✦ Declaring the missing pos variable dynamically from node excelPos array
             const pos = new THREE.Vector3().fromArray(data.excelPos);
 
-            // ✦ Clear glass sphere — replaces purple MeshPhysicalMaterial
+            // Transparent glass sphere wrapping the character
             const sphereMat = new THREE.MeshPhysicalMaterial({
-                color:             0xffffff,   // ✦ neutral white base (was 0x7700bb purple)
-                emissive:          0x000000,   // ✦ no emissive tint (was 0xaa00ff)
+                color:             0xffffff,
+                emissive:          0x000000,
                 emissiveIntensity: 0.0,
-                roughness:         0.0,        // ✦ perfectly smooth glass
+                roughness:         0.0,
                 metalness:         0.0,
-                transmission:      0.96,       // ✦ near-total transmission — clear glass
-                ior:               1.52,       // ✦ standard optical glass IOR
-                thickness:         0.30,       // ✦ thin glass shell
+                transmission:      0.96,
+                ior:               1.52,
+                thickness:         0.30,
                 transparent:       true,
                 opacity:           1.0,
                 side:              THREE.DoubleSide,
@@ -449,21 +444,18 @@
 
         // =========================================================================
         // CONCENTRIC PULSE RIPPLE SYSTEM
-        // ✦ All ripple shells are positioned at HEART_CHAKRA and expand outward
-        //   from that point in all directions (spherically symmetric).
         // =========================================================================
         const RIPPLE_GEO      = new THREE.SphereGeometry(1.0, 72, 36);
-        const PULSE_PERIOD    = 1.6;       // seconds between heartbeat pulses
-        const RINGS_PER_PULSE = 3;         // tight cluster of 3 shells per pulse
-        const RING_STAGGER    = 0.16;      // seconds between shells within a pulse
-        const RING_DURATION   = 5.5;       // shell lifetime at speed = 1.0
-        const RING_MAX_RADIUS = 3.8;       // world-unit radius at full expansion
+        const PULSE_PERIOD    = 1.6;
+        const RINGS_PER_PULSE = 3;
+        const RING_STAGGER    = 0.16;
+        const RING_DURATION   = 5.5;
+        const RING_MAX_RADIUS = 3.8;
 
-        // Leading ring brightest, trailing rings progressively dimmer
         const PULSE_RINGS = [
-            { peakOpacity: 0.13, colorHex: 0xffd700 },  // gold
-            { peakOpacity: 0.09, colorHex: 0xffcc33 },  // amber
-            { peakOpacity: 0.06, colorHex: 0xffe57a },  // pale gold
+            { peakOpacity: 0.13, colorHex: 0xffd700 },
+            { peakOpacity: 0.09, colorHex: 0xffcc33 },
+            { peakOpacity: 0.06, colorHex: 0xffe57a },
         ];
 
         const activeRipples = [];
@@ -471,7 +463,6 @@
         let   pulseTimer    = 0;
         let   goldenFlash   = 0;
 
-        // Asymmetric envelope: sharp crest at leading edge, long exponential tail
         function rippleOpacity(t, peak) {
             const riseT = 0.08;
             if (t < riseT) return peak * (t / riseT);
@@ -486,7 +477,6 @@
             });
             const mesh = new THREE.Mesh(RIPPLE_GEO, mat);
 
-            // ✦ Ripple originates at Heart Chakra position, not world origin
             mesh.position.copy(HEART_CHAKRA);
             mesh.scale.setScalar(0.001);
             mesh.userData = { age: 0, peakOpacity: ringDef.peakOpacity };
@@ -528,7 +518,7 @@
             isRunning    = true;
             currentIndex = 0;
             seqTimer     = 0;
-            pulseTimer   = PULSE_PERIOD; // fire first pulse immediately
+            pulseTimer   = PULSE_PERIOD;
             showNode(0);
         }
 
@@ -567,10 +557,10 @@
             coreLight.intensity  = (Math.sin(elapsedTime * 2.0) * 0.4 + 1.2) * glowVal;
             coreLight.position.y = Math.sin(elapsedTime * 0.6) * 0.5;
 
-            // ✦ Heart accent light breathes gently — always centred at Heart Chakra
+            // Heart accent light breathes gently — always centred at Heart Chakra
             heartLight.intensity = (Math.sin(elapsedTime * 1.4) * 0.2 + 0.7) * glowVal;
 
-            // Golden flash at Heart Chakra — spike on pulse, exponential decay
+            // Golden flash at Heart Chakra
             goldenFlash = Math.max(0, goldenFlash - delta * 3.5);
             goldenCore.intensity = goldenFlash * 2.8 * glowVal;
 
@@ -621,13 +611,12 @@
                 }
             }
 
-            // ✦ Ripple shell update — each shell centered at HEART_CHAKRA
+            // Ripple shell update
             const effectiveDuration = RING_DURATION / rippleSpd;
             for (let i = activeRipples.length - 1; i >= 0; i--) {
                 const r = activeRipples[i];
                 r.userData.age += delta;
                 const t = Math.min(r.userData.age / effectiveDuration, 1.0);
-                // Scale drives radius; position stays locked at HEART_CHAKRA (set at spawn)
                 r.scale.setScalar(Math.max(0.001, t * RING_MAX_RADIUS));
                 r.material.opacity = rippleOpacity(t, r.userData.peakOpacity) * glowVal;
                 if (t >= 1.0) {
@@ -649,4 +638,3 @@
     </script>
 </body>
 </html>
-
