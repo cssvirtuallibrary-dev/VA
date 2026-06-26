@@ -113,7 +113,7 @@
             { id:"B01", name:"Forehead",              excelPos:[0.0,  0.8, -0.1], chakra:"6 - Third Eye Chakra",    char:"𑖀",     phonetic:"A",     series:"Thường Trụ Bất Biến", dharma:"Cintamani Jewel" },
             { id:"B02", name:"Sacral Chakra",         excelPos:[0.0, -0.2,  0.0], chakra:"2 - Sacral Chakra",       char:"𑖢",     phonetic:"Pa",    series:"Thường Trụ Bất Biến", dharma:"Jewel Bowl" },
             { id:"B03", name:"Front Center",          excelPos:[0.0,  0.0, -0.1], chakra:"N/A",                     char:"𑖨",     phonetic:"Ra",    series:"Thường Trụ Bất Biến", dharma:"Lariat Rope" },
-            { id:"B04", name:"Behind Center",         excelPos:[0.0,  0.0,  0.1], chakra:"N/A",                     char:"𑖜",     phonetic:"Nna",   series:"Thường Trụ Bất Biến", dharma:"Jewel Beads" },
+            { id:"B04", name:"Behind Center",         excelPos:[0.0,  0.0,  0.1], chakra:"N/A",                     char:"𑖢",     phonetic:"Nna",   series:"Thường Trụ Bất Biến", dharma:"Jewel Beads" },
             { id:"B05", name:"Above Right Knee",      excelPos:[0.5,  0.0, -0.5], chakra:"N/A",                     char:"𑖬",     phonetic:"Ssa",   series:"Thường Trụ Bất Biến", dharma:"Jewel Bow" },
             { id:"B06", name:"Above Left Knee",       excelPos:[-0.5, 0.0, -0.5], chakra:"N/A",                     char:"𑖪",     phonetic:"Va",    series:"Thường Trụ Bất Biến", dharma:"Jewel Arrow" },
             { id:"B07", name:"Bottom Outer",          excelPos:[0.0, -2.0,  0.0], chakra:"N/A",                     char:"𑖚",     phonetic:"Dda",   series:"Liên Hoa Bồ Đề Tâm",  dharma:"Moon Essence Mani" },
@@ -371,12 +371,20 @@
             ctx.shadowBlur = 8; ctx.fillStyle = '#ddaaff'; ctx.font = '600 44px sans-serif';
             ctx.fillText(phonetic, 256, 395);
             const tex = new THREE.CanvasTexture(canvas);
-            tex.colorSpace = THREE.SRGBColorSpace;
+            
+            // Version safe colorSpace assignment
+            if (THREE.SRGBColorSpace) {
+                tex.colorSpace = THREE.SRGBColorSpace;
+            } else if (THREE.sRGBEncoding) {
+                tex.encoding = THREE.sRGBEncoding;
+            }
             return tex;
         }
 
         animationNodes.forEach((data) => {
-            // ✦ All nodes positioned at HEART_CHAKRA
+            // ✦ Declaring the missing pos variable dynamically from node excelPos array
+            const pos = new THREE.Vector3().fromArray(data.excelPos);
+
             // ✦ Clear glass sphere — replaces purple MeshPhysicalMaterial
             const sphereMat = new THREE.MeshPhysicalMaterial({
                 color:             0xffffff,   // ✦ neutral white base (was 0x7700bb purple)
@@ -412,12 +420,28 @@
 
             textureLoader.load(
                 data.image,
-                (tex) => { tex.colorSpace = THREE.SRGBColorSpace; glyphMat.map = tex; glyphMat.needsUpdate = true; },
+                (tex) => { 
+                    if (THREE.SRGBColorSpace) {
+                        tex.colorSpace = THREE.SRGBColorSpace;
+                    } else if (THREE.sRGBEncoding) {
+                        tex.encoding = THREE.sRGBEncoding;
+                    }
+                    glyphMat.map = tex; 
+                    glyphMat.needsUpdate = true; 
+                },
                 undefined,
                 () => {
                     textureLoader.load(
                         data.image.replace('.PNG', '.png'),
-                        (tex) => { tex.colorSpace = THREE.SRGBColorSpace; glyphMat.map = tex; glyphMat.needsUpdate = true; }
+                        (tex) => { 
+                            if (THREE.SRGBColorSpace) {
+                                tex.colorSpace = THREE.SRGBColorSpace;
+                            } else if (THREE.sRGBEncoding) {
+                                tex.encoding = THREE.sRGBEncoding;
+                            }
+                            glyphMat.map = tex; 
+                            glyphMat.needsUpdate = true; 
+                        }
                     );
                 }
             );
@@ -625,3 +649,4 @@
     </script>
 </body>
 </html>
+
