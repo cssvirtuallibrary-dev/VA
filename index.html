@@ -258,19 +258,19 @@
         // =========================================================================
         // Materials
         // =========================================================================
-        const privacyGreenJade = new THREE.MeshPhysicalMaterial({
-            color:             0x1a5c38,   // ✦ dark jade green (was 0x88ddff blue)
-            emissive:          0x0a2e1a,   // ✦ deep jade emissive (was 0x0044aa)
-            emissiveIntensity: 0.25,       // ✦ subtler glow suits jade (was 0.4)
-            roughness:         0.35,       // ✦ slight surface texture for jade feel (was 0.5)
+        const GreenJade = new THREE.MeshPhysicalMaterial({
+            color:             0x1a5c38,   // dark jade green
+            emissive:          0x0a2e1a,   // deep jade emissive
+            emissiveIntensity: 0.25,
+            roughness:         0.35,
             metalness:         0.08,
-            transmission:      0.10,       // ✦ 50 % transparency (was 0.75)
-            ior:               1.62,       // ✦ jade refractive index ~1.60–1.65 (was 1.5)
-            thickness:         2.2,        // ✦ slightly thicker for richer colour depth (was 1.8)
-            transparent:       true,
+            transmission:      0.0,        // ✦ fully solid — no transmission (was 0.50)
+            ior:               1.62,
+            thickness:         0.0,        // ✦ irrelevant at 0 transmission, set to 0
+            transparent:       false,      // ✦ completely opaque (was true)
             opacity:           1.0,
-            side:              THREE.DoubleSide,
-            depthWrite:        false
+            side:              THREE.FrontSide,  // ✦ FrontSide only for solid object (was DoubleSide)
+            depthWrite:        true        // ✦ solid objects write depth (was false)
         });
 
         const clearBubbleGlass = new THREE.MeshPhysicalMaterial({
@@ -302,7 +302,7 @@
             (gltf) => {
                 const m = gltf.scene;
                 m.traverse((node) => {
-                    if (node.isMesh) { node.material = privacyGreenJade; node.castShadow = true; node.receiveShadow = true; }
+                    if (node.isMesh) { node.material = GreenJade; node.castShadow = true; node.receiveShadow = true; }
                 });
                 m.scale.set(1.4, 1.4, 1.4);
                 m.position.set(0.0, -0.5, -0.18);
@@ -316,11 +316,11 @@
             (err) => {
                 console.warn("Procedural fallback.", err);
                 const fg = new THREE.Group();
-                const head  = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), privacyGreenJade);
+                const head  = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), GreenJade);
                 head.position.y = 0.55; fg.add(head);
-                const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.28, 0.65, 32), privacyGreenJade);
+                const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.28, 0.65, 32), GreenJade);
                 torso.position.y = 0.1; fg.add(torso);
-                const legs  = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.12, 16, 100), privacyGreenJade);
+                const legs  = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.12, 16, 100), GreenJade);
                 legs.rotation.x = Math.PI / 2; legs.position.y = -0.25; fg.add(legs);
                 fg.position.set(0.0, -0.5, -0.18); fg.rotation.y = Math.PI / 2;
                 buddhaGroup.add(fg);
@@ -377,13 +377,20 @@
 
         animationNodes.forEach((data) => {
             // ✦ All nodes positioned at HEART_CHAKRA
-            const pos = HEART_CHAKRA.clone();
-
+            // ✦ Clear glass sphere — replaces purple MeshPhysicalMaterial
             const sphereMat = new THREE.MeshPhysicalMaterial({
-                color: new THREE.Color(0x7700bb), emissive: new THREE.Color(0xaa00ff),
-                emissiveIntensity: 0.0, roughness: 0.08, metalness: 0.0,
-                transmission: 0.50, ior: 1.45, thickness: 0.45,
-                transparent: true, opacity: 0.92, side: THREE.DoubleSide, depthWrite: false
+                color:             0xffffff,   // ✦ neutral white base (was 0x7700bb purple)
+                emissive:          0x000000,   // ✦ no emissive tint (was 0xaa00ff)
+                emissiveIntensity: 0.0,
+                roughness:         0.0,        // ✦ perfectly smooth glass
+                metalness:         0.0,
+                transmission:      0.96,       // ✦ near-total transmission — clear glass
+                ior:               1.52,       // ✦ standard optical glass IOR
+                thickness:         0.30,       // ✦ thin glass shell
+                transparent:       true,
+                opacity:           1.0,
+                side:              THREE.DoubleSide,
+                depthWrite:        false
             });
             const sphere = new THREE.Mesh(NODE_SPHERE_GEO, sphereMat);
             sphere.position.copy(pos);
