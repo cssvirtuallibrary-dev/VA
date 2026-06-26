@@ -264,10 +264,10 @@
             emissiveIntensity: 0.25,
             roughness:         0.35,
             metalness:         0.08,
-            transmission:      0.0,        // ✦ fully solid — no transmission (was 0.50)
+            transmission:      0.5,        // ✦ fully solid — no transmission (was 0.50)
             ior:               1.62,
             thickness:         0.0,        // ✦ irrelevant at 0 transmission, set to 0
-            transparent:       false,      // ✦ completely opaque (was true)
+            transparent:       true,      // ✦ completely opaque (was true)
             opacity:           1.0,
             side:              THREE.FrontSide,  // ✦ FrontSide only for solid object (was DoubleSide)
             depthWrite:        true        // ✦ solid objects write depth (was false)
